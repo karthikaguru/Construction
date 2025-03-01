@@ -1,0 +1,15 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% block title %}Milestone List{% endblock %}
+
+
+{% block content %}
+    <h1>Milestones List</h1>
+    <ul>
+        {% for milestone in milestones %}
+            <li>{{ milestone.name }} - {{ milestone.status }} - Due: {{ milestone.due_date }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

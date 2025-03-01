@@ -1,0 +1,19 @@
+<!-- client_onboarding.html -->
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% block title %}Project Onboarding{% endblock %}
+
+{% block content %}
+<h1>Project Onboarding</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h2>Project Details</h2>
+    {{ project_form.as_p }}
+    
+    <button type="submit">Save  Project Information</button>
+</form>
+{% endblock %}
+
+
