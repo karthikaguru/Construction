@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'projectsite',
     'frontsite',
     'bootstrap5',
-    'crispy_forms'
+    
 ]
 
 MIDDLEWARE = [
@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'construct.wsgi.application'
 DATABASES = {
     'default': {
           'ENGINE': 'django.db.backends.postgresql',
-          'NAME': 'leaf',
+          'NAME': 'leafconstruction',
           'USER': 'postgres',
           'PASSWORD':'karthika97',
           'HOST': 'localhost',
@@ -133,7 +133,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR ,'documents/')
 STATICFILES_DIRS =[os.path.join(BASE_DIR ,'static/')]
 
 
-
+LOGIN_REDIRECT_URL ='/site/dashboard/'
 
 CRISPY_TEMPLATE_PACK ='bootstrap4'
 # Default primary key field type

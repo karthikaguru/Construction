@@ -21,6 +21,9 @@
                   {% csrf_token%}           
                    {{form.as_p}}
                    <button class="text-light bg-primary">login</button>
+                   <div class="form-group">
+                        <button class="btn btn-outline-info" type="Submit" href="{% url 'register'%}">Sign Up</button>
+                    </div>
                </form>
          </div>
 </div>

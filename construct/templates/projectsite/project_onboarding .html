@@ -5,15 +5,13 @@
 {% block title %}Project Onboarding{% endblock %}
 
 {% block content %}
-<h1>Project Onboarding</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <h2>Project Details</h2>
-    {{ project_form.as_p }}
-    
-    <button type="submit">Save  Project Information</button>
-</form>
+<h1>Project Dashboard</h1>
+<h2>Client: {{ client.name }}</h2>
+ <ul>
+    {% for project in projects %}
+            <li>{{ project.name }} - <a href="{% url 'status_update' project.id %}">Update Status</a></li>
+        {% endfor %}
+    </ul>
 {% endblock %}
 
 
