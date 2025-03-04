@@ -1,26 +1,36 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Client(models.Model):
-    first_name = models.CharField(max_length=100,null=True,blank=True)
-    last_name = models.CharField(max_length=100,null=True,blank=True)
-    phone_number = models.IntegerField()
-    email = models.EmailField(max_length=155)
-    site_location = models.CharField(max_length=100)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField()
+    site_location = models.CharField(max_length=200)
     site_name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project_start_date = models.DateField()
+    project_end_date = models.DateField()
+    project_duration = models.IntegerField(editable=False)  # Auto-calculated
+    project_budget = models.DecimalField(max_digits=10, decimal_places=2)
+    documents = models.FileField(upload_to='documents/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.project_duration = (self.project_end_date - self.project_start_date).days
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 class Project(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    project_budget = models.DecimalField(max_digits=10, decimal_places=2)
-    documents = models.FileField(upload_to='documents/', null=True, blank=True)
-    
-    @property
-    def project_duration(self):
-       return (self.end_date - self.start_date).days
+    name = models.CharField(max_length=100)
+    budget = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 
 class Stage(models.Model):
     STAGE_CHOICES = [
@@ -48,24 +58,17 @@ class Stage(models.Model):
     due_date = models.DateField()
     completed = models.BooleanField(default=False)
     progress = models.IntegerField(default=0)
+    start_date = models.DateField()  # Ensure this field is defined
+    end_date = models.DateField() 
     stage_type = models.CharField(max_length=50, choices=STAGE_CHOICES)
 
 class Expense(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    item = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
     amount_spent = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
 
-class Milestone(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    due_date = models.DateField()
-    status = models.IntegerField()
+    def __str__(self):
+        return self.description
 
-class Upload(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    file = models.FileField(upload_to='uploads/')
-    upload_type = models.CharField(max_length=50)
- 
 
