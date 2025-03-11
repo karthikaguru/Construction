@@ -1,0 +1,30 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}Login {% endblock %}
+
+{% block content %}
+<div class="container well" style="margin:130px; display: flex; justify-content: center; align-items: center; width: 450px; height: 350px;">
+    <div class="content-section" style="text-align: center;">
+        <h1>Login</h1>
+        <div class="m-3 p-3">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{message.tags}}">
+                        {{message}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <form method="POST" autocomplete="off">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary text-light">Login</button>
+            </form>
+            <a class="btn btn-outline-primary bg-info  mt-2" href="{% url 'register' %}">Sign Up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

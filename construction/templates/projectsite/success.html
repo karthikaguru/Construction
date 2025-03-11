@@ -1,0 +1,17 @@
+<!-- success.html -->
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% block title %}Status_update{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+    <h1>Status Update Successful!</h1>
+    <p>Your status update for the project has been successfully saved.</p>
+    <a href="{% url 'project_dashboard' %}" class="btn btn-primary">Back to Project Dashboard</a>
+</div>
+{% endblock%}

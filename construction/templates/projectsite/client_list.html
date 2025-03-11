@@ -1,0 +1,49 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% block title %}>Client List<{% endblock %}
+
+{% block content %}
+    <div class="container-fluid m-1 new">
+        <h1>Client List</h1>
+        <table class="table table-hover table-bordered bg-black text-light">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Phone Number</th>
+                    <th>Email</th>
+                    <th>Site Location</th>
+                    <th>Site Name</th>
+                    <th>Project Start Date</th>
+                    <th>Project End Date</th>
+                    <th>Project Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.phone_number }}</td>
+                    <td>{{ client.email }}</td>
+                    <td>{{ client.site_location }}</td>
+                    <td>{{ client.site_name }}</td>
+                    <td>{{ client.project_start_date }}</td>
+                    <td>{{ client.project_end_date }}</td>
+                    <td>{{ client.project_duration }} days</td>
+                    <td style="width: 300px;">
+                        <a href="{% url 'project_list_by_client' client.id %}" class="btn btn-primary btn-sm p-2">View Projects</a>
+                        <a href="{% url 'client_edit' client.id %}" class="btn btn-warning btn-sm p-2">Update</a>
+                        <a href="{% url 'client_delete' client.id %}" class="btn btn-danger btn-sm p-2 m-1" >Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'client_create' %}" class="btn btn-primary fs-4">Add New Client</a>
+            </div>
+{% endblock %}
+
+

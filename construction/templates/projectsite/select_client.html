@@ -1,0 +1,21 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}Select Client {% endblock %}
+
+{% block content %}
+    <h1>Select a Client</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="selected_client">Choose a client:</label>
+        <select name="selected_client" id="selected_client">
+            {% for client in clients %}
+            <option value="{{ client.id }}">{{ client.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Continue</button>
+    </form>
+{% endblock%}

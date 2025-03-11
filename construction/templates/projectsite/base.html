@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaf Construction</title>
+    <link rel="stylesheet" href="{% static 'css/leaf.css' %}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'profile' %}">Profile</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'register' %}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="d-flex">
+        <div class="d-flex flex-column flex-shrink-0 p-3 sidebar-custom text-white">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                <span class="fs-4">Sidebar</span>
+            </a>
+            <hr>
+            {% if user.is_authenticated %}
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="menu-title">
+                    <span>Main Menu</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" data-bs-toggle="collapse" href="#dashboardSubMenu" role="button" aria-expanded="false" aria-controls="dashboardSubMenu">
+                        <i class="fas fa-tools"></i> Dashboard
+                    </a>
+                    <div class="collapse" id="dashboardSubMenu">
+                        <ul class="submenu list-unstyled ps-3">
+                            <li><a href="index.html" class="text-white">Admin Dashboard</a></li>
+                            <li><a href="{% url 'project_dashboard_view' %}" class="text-white">Project Dashboard</a></li>
+                            <li><a href="{% url 'client_dashboard_view' %}" class="text-white">Client Dashboard</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" data-bs-toggle="collapse" href="#projectsSubMenu" role="button" aria-expanded="false" aria-controls="projectsSubMenu">
+                        <i class="fas fa-hard-hat"></i> Projects
+                    </a>
+                    <div class="collapse" id="projectsSubMenu">
+                        <ul class="submenu list-unstyled ps-3">
+                            <li><a href="{% url 'project_list' %}" class="text-white">Project List</a></li>
+                            {% for project in projects %}
+                            <li><a href="{% url 'project_details' project.id %}" class="text-white">Project View</a></li>
+                            <li><a href="{% url 'project_edit' project.id %}" class="text-white">Project Edit</a></li>
+                            {% endfor %}
+                            <li><a href="{% url 'project_add' %}" class="text-white">Project Add</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" data-bs-toggle="collapse" href="#clientsSubMenu" role="button" aria-expanded="false" aria-controls="clientsSubMenu">
+                        <i class="fas fa-users"></i> Clients
+                    </a>
+                    <div class="collapse" id="clientsSubMenu">
+                        <ul class="submenu list-unstyled ps-3">
+                            <li><a href="{% url 'client_list' %}" class="text-white">Client List</a></li>
+                            <li><a href="{% url 'client_create' %}" class="text-white">Client Add</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+            
+            {% else %}
+            <ul class="nav nav-pills flex-column mb-auto">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'logout' %}">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'profile' %}">Profile</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link active m-2" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active m-2" href="{% url 'register' %}">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+            {% endif %}
+            <hr>
+        </div>
+
+        <div class="content p-4">
+            <!-- Content for each page will be injected here -->
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

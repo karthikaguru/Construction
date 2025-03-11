@@ -1,0 +1,25 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% block title %}Project List<{% endblock %}
+
+{% block content %}
+    <h1>Project List</h1>
+    <h1>Projects</h1>
+    <ul>
+        {% for project in projects %}
+        <li>
+            <strong>{{ project.name }}</strong><br>
+            Budget: {{ project.budget }}<br>
+            Description: {{ project.description }}<br>
+            Client: {{ project.client.name }}<br>
+        </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
+

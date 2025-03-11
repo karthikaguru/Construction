@@ -1,0 +1,22 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% block title %}Project Detail{% endblock %}
+{% block content %}
+
+    <div class="container mt-5">
+        <h1 class="display-4">{{ project.name }}</h1>
+        <p><strong>Budget:</strong> {{ project.budget }}</p>
+        <p><strong>Client:</strong> {{ project.client }}</p>
+        <p><strong>Description:</strong> {{ project.description }}</p>
+        {% for project in projects %}
+            <li>
+                <a href="{% url 'project_details' project.id %}">{{ project.name }}</a>
+            </li>
+        {% endfor %}
+        <a href="{% url 'project_edit' project.id %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'project_delete' project.id %}" class="btn btn-danger">Delete</a>
+    </div>
+   
+
+{% endblock %}
