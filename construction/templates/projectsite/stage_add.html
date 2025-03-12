@@ -1,0 +1,10 @@
+{% extends 'projectsite/base.html' %}
+{% block title %}Add Stage{% endblock %}
+{% block content %}
+    <h1>{{ form.instance.id|yesno:"Edit Stage,Add Stage" }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Save</button>
+    </form>
+{% endblock %}

@@ -1,17 +1,17 @@
-<!-- success.html -->
 {% extends 'projectsite/base.html' %}
 {% load static %}
 {% load bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-{% block title %}Status_update{% endblock %}
 
+{% block title %}Status Update{% endblock %}
 
 {% block content %}
-
-<div class="container">
-    <h1>Status Update Successful!</h1>
-    <p>Your status update for the project has been successfully saved.</p>
-    <a href="{% url 'project_dashboard' %}" class="btn btn-primary">Back to Project Dashboard</a>
+<div class="container mt-5 d-flex flex-column align-items-center">
+    <div class="content-section text-center w-100">
+        <h1>Status Update Successful!</h1>
+        <p>Your status update for the project has been successfully saved.</p>
+        <a href="{% url 'project_dashboard_view' %}" class="btn btn-primary">Back to Project Dashboard</a>
+    </div>
 </div>
-{% endblock%}
+{% endblock %}

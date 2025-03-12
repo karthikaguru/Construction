@@ -21,9 +21,11 @@
             <form method="POST" autocomplete="off">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button class="btn btn-primary text-light">Login</button>
-            </form>
-            <a class="btn btn-outline-primary bg-info  mt-2" href="{% url 'register' %}">Sign Up</a>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-primary text-light me-2 ms-1">Login</button>
+                    <a class="btn btn-primary text-light  ms-3" href="{% url 'register' %}">Sign Up</a>
+                </div>
+                </form>
         </div>
     </div>
 </div>

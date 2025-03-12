@@ -1,0 +1,28 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}Expense Details{% endblock %}
+{% block content %}
+  <h1>Expense Details</h1>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Amount Spent</th>
+        <th>Date</th>
+        <th>Project</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ expense.description }}</td>
+        <td>{{ expense.amount_spent }}</td>
+        <td>{{ expense.date }}</td>
+        <td>{{ project.name }}</td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

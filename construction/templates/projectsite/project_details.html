@@ -1,22 +1,51 @@
 {% extends 'projectsite/base.html' %}
 {% load static %}
 {% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
 {% block title %}Project Detail{% endblock %}
 {% block content %}
 
-    <div class="container mt-5">
-        <h1 class="display-4">{{ project.name }}</h1>
-        <p><strong>Budget:</strong> {{ project.budget }}</p>
-        <p><strong>Client:</strong> {{ project.client }}</p>
-        <p><strong>Description:</strong> {{ project.description }}</p>
-        {% for project in projects %}
-            <li>
-                <a href="{% url 'project_details' project.id %}">{{ project.name }}</a>
-            </li>
-        {% endfor %}
-        <a href="{% url 'project_edit' project.id %}" class="btn btn-primary">Edit</a>
-        <a href="{% url 'project_delete' project.id %}" class="btn btn-danger">Delete</a>
-    </div>
-   
+<div class="container mt-5" >
+    <h1>{{ project.name }}</h1>
+    <p>Budget: {{ project.budget }}</p>
+    <p>Description: {{ project.description }}</p>
+    <p>Client: {{ project.client }}</p>
+    <a href="{% url 'project_edit' project.pk %}" class="btn btn-secondary">Edit Project</a>
+    <a href="{% url 'project_list' %}" class="btn btn-secondary">Back to List</a>
+    
+    <h2>Stages</h2>
+    <table class="table table-striped table-bordered table-hover mt-4">
+        <thead>
+            <tr>
+                <th>Stage Type</th>
+                <th>Start Date</th>
+                <th>Due Date</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th>Hours Logged</th>
+                <th>Milestones</th>
+                <th>Comments</th>
+                <th>Completion Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stage in stages %}
+            <tr>
+                <td>{{ stage.stage_type }}</td>
+                <td>{{ stage.start_date }}</td>
+                <td>{{ stage.due_date }}</td>
+                <td>{{ stage.progress }}%</td>
+                <td>{{ stage.get_status_display }}</td>
+                <td>{{ stage.hours_logged }}</td>
+                <td>{{ stage.milestones }}</td>
+                <td>{{ stage.comments }}</td>
+                <td>{% if stage.completed == 'C' %} Completed {% elif stage.completed == 'NC' %} Not Completed {% else %} Pending {% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}

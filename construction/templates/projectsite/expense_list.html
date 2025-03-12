@@ -1,0 +1,15 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}Expense List{% endblock %}
+{% block content %}
+  <h1>Expenses for {{ project.name }}</h1>
+  <ul>
+    {% for expense in expenses %}
+      <li><a href="{% url 'expense_details' project.id expense.id %}">{{ expense.description }}</a> - {{ expense.amount_spent }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

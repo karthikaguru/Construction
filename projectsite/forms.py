@@ -10,7 +10,7 @@ class ClientForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'budget', 'description']
+        fields = ['name', 'budget', 'description', 'client']
 
 class StageForm(forms.ModelForm):
     class Meta:

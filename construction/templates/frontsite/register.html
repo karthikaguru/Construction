@@ -8,25 +8,48 @@
 
 {% block content %}
 
-<div class="container well p-3 " style="margin-top: 100px; width:650px;">
+<div class="container well p-5" style="margin-top: 100px; max-width: 650px;">
     <div>
-        <h2 class="text-primary page-header text-center"> Register page</h2>
-     <form method="POST" autocomplete="off">
-        {% csrf_token %}
-        
+        <h2 class="text-primary page-header text-center mb-4">Register Page</h2>
+        <form method="POST" autocomplete="off">
+            {% csrf_token %}
             <legend class="border-bottom mb-4">Join-Today</legend>
-      
-        {{form.as_p}}
-    <div class="form-group">
-        <button class="btn btn-outline-info" type="Submit" href="{%url 'register'%}">Sign Up</button>
+            
+            <div class="form-group row mb-3">
+                <label for="id_username" class="col-sm-3 col-form-label">Username :</label>
+                <div class="col-sm-9">
+                    {{ form.username }}
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <label for="id_email" class="col-sm-3 col-form-label">Email :</label>
+                <div class="col-sm-9">
+                    {{ form.email }}
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <label for="id_password1" class="col-sm-3 col-form-label" autocomplete="new-password">Password :</label>
+                <div class="col-sm-9">
+                    {{ form.password1 }}
+                </div>
+            </div>
+            <div class="form-group row mb-3">
+                <label for="id_password2" class="col-sm-3 col-form-label" autocomplete="new-password" >Confirm Password :</label>
+                <div class="col-sm-9">
+                    {{ form.password2 }}
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <button class="btn btn-primary text-light" type="submit">Sign Up</button>
+            </div>
+            <div class="border-top pt-3">
+                <small class="text-secondary">
+                    Already have an account? <a href="{% url 'login' %} ">Sign in</a>
+                </small>
+            </div>
+        </form>
     </div>
-    <div class="border-top pt-3">
-        <small class="text-muted">
-            Already have an account?<a  class="ml-2" href="{%url 'login'%}">Sign in</a>
-        </small>
-    </div>
-</div>
-    </form>
 </div>
 
 {% endblock %}

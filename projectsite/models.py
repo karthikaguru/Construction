@@ -30,7 +30,6 @@ class Project(models.Model):
         return self.name
 
 
-
 class Stage(models.Model):
     STAGE_CHOICES = [
         ('ceiling', 'Ceiling'),
@@ -57,14 +56,25 @@ class Stage(models.Model):
         ('NC', 'Not Completed'),
         ('P', 'Pending')
     ]
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ('not_started', 'Not Started'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('on_hold', 'On Hold'),
+    ]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='stages')
     name = models.CharField(max_length=100)
     due_date = models.DateField()
     completed = models.CharField(max_length=2, choices=COMPLETED_CHOICES, default='P')
     progress = models.IntegerField(default=0)
-    start_date = models.DateField()  # Ensure this field is defined
-    end_date = models.DateField(null=True, blank=True) 
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
     stage_type = models.CharField(max_length=50, choices=STAGE_CHOICES)
+   
+
+    def __str__(self):
+        return f"{self.stage_type} - {self.project.name}"
 
 class Expense(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

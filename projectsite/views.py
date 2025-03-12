@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ClientForm, ProjectForm,StageForm
+from .forms import ClientForm, ProjectForm,StageForm,ExpenseForm
 from .models import Client, Project, Stage, Expense
 from django.contrib.auth.decorators import login_required
 import json
@@ -87,51 +87,46 @@ def client_list(request):
     clients = Client.objects.all()
     return render(request, 'projectsite/client_list.html', {'clients': clients})
 
-def project_list(request, client_id=None):
-    if client_id:
-        projects = Project.objects.filter(client_id=client_id)
-    else:
-        projects = Project.objects.all()
+
+# List all projects
+def project_list(request):
+    projects = Project.objects.all()
     return render(request, 'projectsite/project_list.html', {'projects': projects})
 
-
-@login_required
+# View details of a single project
 def project_details(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    return render(request, 'projectsite/project_detail.html', {'project': project})
+    project = Project.objects.get( pk=project_id)
+    return render(request, 'projectsite/project_details.html', {'project': project})
 
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Client, Project
-from .forms import ProjectForm
-
-@login_required
+# Create a new project
 def project_add_view(request):
-    clients = Client.objects.filter(user=request.user)
-    
-    if request.method == 'POST' and 'selected_client' in request.POST:
-        selected_client_id = request.POST.get('selected_client')
-        client = get_object_or_404(Client, id=selected_client_id, user=request.user)
-        form = ProjectForm(request.POST, request.FILES)
+    if request.method == "POST":
+        form = ProjectForm(request.POST)
         if form.is_valid():
-            project = form.save(commit=False)
-            project.client = client  # Assign the selected client to the project
-            project.save()
+            form.save()
             return redirect('project_list')
     else:
-        if clients.exists() and clients.count() == 1:
-            client = clients.first()
-            form = ProjectForm()
-            return render(request, 'projectsite/project_add.html', {'form': form, 'client': client})
-        elif clients.exists() and clients.count() > 1:
-            return render(request, 'projectsite/select_client.html', {'clients': clients})
-        else:
-            return redirect('client_create')
+        form = ProjectForm()
+    return render(request, 'projectsite/project_add.html', {'form': form})
 
-    return render(request, 'projectsite/project_add.html', {'form': form, 'client': client})
+# Edit an existing project
+def project_edit(request, pk):
+    project = Project.objects.get( pk=pk)
+    if request.method == "POST":
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return redirect('project_detail', pk=pk)
+    else:
+        form = ProjectForm(instance=project)
+    return render(request, 'projectsite/project_form.html', {'form': form})
 
 
+
+@login_required
+def project_list_view(request):
+    projects = Project.objects.filter(client__user=request.user)
+    return render(request, 'projectsite/project_list.html', {'projects': projects})
 
 
 @login_required
@@ -149,15 +144,17 @@ def project_edit_view(request, project_id):
 
 @login_required
 def project_delete_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    project = Project.objects.get(id=project_id)
     if request.method == 'POST':
         project.delete()
-        return redirect('/site/success/')  # Change to your success URL
+        return redirect('project_list')  # Change to your success URL
     return render(request, 'projectsite/project_delete.html', {'project': project})
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Client, Project, Expense
-import json
+
+
+def project_list_by_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    projects = Project.objects.filter(client=client)
+    return render(request, 'projectsite/project_list_by_client.html', {'client': client, 'projects': projects})
 
 @login_required
 def project_dashboard_view(request):
@@ -181,7 +178,81 @@ def project_dashboard_view(request):
     return render(request, 'projectsite/projectdashboard.html', context)
 
 
+def stage_list(request, project_id):
+    project = Project.objects.get( id=project_id)
+    stages = Stage.objects.filter(project=project)
+    return render(request, 'projectsite/stage_list.html', {'project': project, 'stages': stages})
 
+
+
+def stage_details(request, id):
+    project = get_object_or_404(Project, id=id)
+    stages = Stage.objects.filter(project=project)
+    return render(request, 'projectsite/stage_details.html', {'project': project, 'stages': stages})
+
+def stage_add(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+        form = StageForm(request.POST)
+        if form.is_valid():
+            stage = form.save(commit=False)
+            stage.project = project
+            stage.save()
+            return redirect('stage_list', project_id=project_id)
+    else:
+        form = StageForm()
+    return render(request, 'projectsite/stage_add.html', {'form': form, 'project': project})
+
+def stage_edit(request, stage_id):
+    stage = get_object_or_404(Stage, id=stage_id)
+    if request.method == 'POST':
+        form = StageForm(request.POST, instance=stage)
+        if form.is_valid():
+            form.save()
+            return redirect('stage_detail', stage_id=stage_id)
+    else:
+        form = StageForm(instance=stage)
+    return render(request, 'projectsite/stage_edit.html', {'form': form})
+
+def stage_delete(request, stage_id):
+    stage = get_object_or_404(Stage, id=stage_id)
+    if request.method == 'POST':
+        stage.delete()
+        return redirect('stage_list', project_id=stage.project.id)
+    return render(request, 'projectsite/stage_confirm_delete.html', {'stage': stage})
+
+
+# Expense view
+def expense_create(request):
+    if request.method == "POST":
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('expense_list')
+    else:
+        form = ExpenseForm()
+    return render(request, 'app/expense_form.html', {'form': form})
+
+
+
+
+def expense_list(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    expenses = Expense.objects.filter(project=project)
+    context = {
+        'project': project,
+        'expenses': expenses,
+    }
+    return render(request, 'projectsite/expense_list.html', context)
+
+def expense_details(request, project_id, expense_id):
+    project = get_object_or_404(Project, pk=project_id)
+    expense = get_object_or_404(Expense, pk=expense_id, project=project)
+    context = {
+        'project': project,
+        'expense': expense,
+    }
+    return render(request, 'projectsite/expense_details.html', context)
 
 
 @login_required

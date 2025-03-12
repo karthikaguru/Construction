@@ -23,7 +23,7 @@
                     <ul>
                         {% for project in projects %}
                             {% if project.client == client %}
-                                <li><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></li>
+                                <li><a href="{% url 'project_details' project.id %}">{{ project.name }}</a></li>
                             {% endif %}
                         {% endfor %}
                     </ul>

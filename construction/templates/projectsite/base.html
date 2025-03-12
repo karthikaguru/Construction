@@ -76,13 +76,15 @@
                     <div class="collapse" id="projectsSubMenu">
                         <ul class="submenu list-unstyled ps-3">
                             <li><a href="{% url 'project_list' %}" class="text-white">Project List</a></li>
-                            {% for project in projects %}
-                            <li><a href="{% url 'project_details' project.id %}" class="text-white">Project View</a></li>
-                            <li><a href="{% url 'project_edit' project.id %}" class="text-white">Project Edit</a></li>
-                            {% endfor %}
                             <li><a href="{% url 'project_add' %}" class="text-white">Project Add</a></li>
+                            <!--i included stages here-->
+                            {% if project %}
+                            <li><a href="{% url 'stage_details' project.id %}" class="text-white">Project Stages</a></li>
+                            {% endif %}
+                        
                         </ul>
                     </div>
+                    
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-white" data-bs-toggle="collapse" href="#clientsSubMenu" role="button" aria-expanded="false" aria-controls="clientsSubMenu">
