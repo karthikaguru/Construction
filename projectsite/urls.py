@@ -27,7 +27,12 @@ urlpatterns = [
     path('stage/<int:stage_id>/delete/', views.stage_delete, name='stage_delete'),
     path('stage_list/<int:project_id>/', views.stage_list, name='stage_list'),
     #url for expense
-      path('project/<int:project_id>/expenses/', views.expense_list, name='expense_list'),
-    path('project/<int:project_id>/expenses/<int:expense_id>/', views.expense_details, name='expense_details'),
+    path('projects/<int:project_id>/expenses/', views.expense_list, name='expense_list'),
+    path('projects/<int:project_id>/expenses/new/', views.expense_new, name='expense_new'),
+    path('projects/<int:project_id>/expenses/<int:expense_id>/', views.expense_details, name='expense_details'),
+    path('projects/<int:project_id>/expenses/<int:expense_id>/edit/', views.expense_edit, name='expense_edit'),
+    path('projects/<int:project_id>/expenses/<int:expense_id>/delete/', views.expense_delete, name='expense_delete'),
 ]
+
+
 

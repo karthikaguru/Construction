@@ -1,4 +1,3 @@
-<!-- client_onboarding.html -->
 {% extends 'projectsite/base.html' %}
 {% load static %}
 {% load bootstrap5 %}
@@ -7,27 +6,29 @@
 {% block title %}Project Dashboard{% endblock %}
 
 {% block content %}
-
 <h1>Welcome, {{ client.name }}</h1>
 <h2>Your Projects:</h2>
 <ul>
     {% for project in projects %}
-        <li>{{ project.name }} - {{ project.duration }} days, Budget: {{ project.budget }} - Total Spent: {{ project.total_spent }}</li>
-        <a href="{% url 'status_update' project.id %}">Update Status</a>
-    </li>
-{% endfor %}
-        
+        <li>{{ project.name }} - {{ project.duration }} days, Budget: {{ project.budget }} - Total Spent: {{ project.total_spent }}
+            <a href="{% url 'status_update' project.id %}">Update Status</a>
+        </li>
+    {% endfor %}
 </ul>
 
 <h2>Budget vs. Total Spent</h2>
 <canvas id="budgetChart" width="400" height="200"></canvas>
-<script type="application/json" id="projectNamesData">{{ project_names|json_script:"projectNamesData" }}</script>
-<script type="application/json" id="budgetsData">{{ budgets|json_script:"budgetsData" }}</script>
-<script type="application/json" id="totalSpentsData">{{ total_spents|json_script:"totalSpentsData" }}</script>
+{% endblock %}
+
+{% block scripts %}
 <script>
-    var projectNames = JSON.parse(document.getElementById('projectNamesData').textContent);
-    var budgets = JSON.parse(document.getElementById('budgetsData').textContent);
-    var totalSpents = JSON.parse(document.getElementById('totalSpentsData').textContent);
+    var projectNames = {{ project_names }};
+    var budgets = {{ budgets|safe }};
+    var totalSpents = {{ total_spents|safe }};
+
+    console.log("Project Names: ", projectNames);
+    console.log("Budgets: ", budgets);
+    console.log("Total Spent: ", totalSpents);
 
     var ctx = document.getElementById('budgetChart').getContext('2d');
     var budgetChart = new Chart(ctx, {
@@ -57,10 +58,4 @@
         }
     });
 </script>
-
-
 {% endblock %}
-
-
-
-

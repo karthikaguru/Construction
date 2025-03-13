@@ -1,0 +1,17 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}Expense Edit{% endblock %}
+
+{% block content %}
+  <h2>{% if form.instance.pk %}Edit{% else %}New{% endif %} Expense for {{ project.name }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+  <a href="{% url 'expense_list' project.id %}">Cancel</a>
+{% endblock %}

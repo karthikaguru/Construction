@@ -20,4 +20,11 @@ class StageForm(forms.ModelForm):
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
-        fields = ['description', 'amount_spent', 'date']
+        fields = ['project', 'stage', 'description', 'amount_spent', 'date']
+        widgets = {
+            'project': forms.Select(attrs={'class': 'form-control'}),
+            'stage': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'amount_spent': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }

@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Client(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='client')
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default='')
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -77,12 +78,16 @@ class Stage(models.Model):
         return f"{self.stage_type} - {self.project.name}"
 
 class Expense(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    description = models.CharField(max_length=200)
-    amount_spent = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name="Project")
+    stage = models.ForeignKey(Stage, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Stage")
+    description = models.TextField()
+    amount_spent = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Amount Spent")
+    date = models.DateField(verbose_name="Date")
+
+    class Meta:
+        ordering = ['date']
+        verbose_name = "Expense"
+        verbose_name_plural = "Expenses"
 
     def __str__(self):
-        return self.description
-
-
+        return f"{self.date} - {self.project.name} - {self.stage.stage_type if self.stage else 'No Stage'}"

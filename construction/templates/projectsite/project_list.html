@@ -9,7 +9,7 @@
 
 {% block content %}
     <h1>Project List</h1>
-    <table class="table table-striped px-3 m- table-bordered table-hover" style="width: 1000px;">
+    <table class="table table-striped px-3 m- table-bordered table-hover" style="width: 1250px;">
         <thead>
             <tr>
                 <th>Client</th>
@@ -25,11 +25,12 @@
                 <td>{{ project.name }}</td>
                 <td>{{ project.budget }}</td>
                 <td>{{ project.description }}</td>
-                <td>
-                    <a href="{% url 'project_edit' project.id %}" class="btn btn-primary btn-sm">Update</a>
+                <td class="button"     style="width: 200px;">
+                    <a href="{% url 'project_edit' project.id %}" class="btn btn-warning btn-sm m-1 p-1">Update</a>
                     <a href="{% url 'project_delete' project.id %}" class="btn btn-danger btn-sm">Delete</a>
-                    <a href="{% url 'stage_details' project.id %}" class="btn btn-primary btn-sm">View Stages</a>
-                    <a href="{% url 'stage_add' project.id %}" class="btn btn-success btn-sm">Add New Stage</a> <!-- Add New Stage button -->      
+                    <a href="{% url 'stage_details' project.id %}" class="btn btn-primary btn-sm  p-1">View Stages</a>
+                    <a href="{% url 'stage_add' project.id %}" class="btn btn-success btn-sm  p-1">Add New Stage</a> <!-- Add New Stage button -->   
+                    <a href="{% url 'expense_list' project.id %}" class="btn btn-primary btn-sm  m-1 p-1">Expenses</a>
                 </td>
             </tr>
             {% endfor %}

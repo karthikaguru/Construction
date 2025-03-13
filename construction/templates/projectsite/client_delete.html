@@ -4,14 +4,16 @@
 {% load bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-{% block title %}Client Onboarding{% endblock %}
+{% block title %}Delete Client{% endblock %}
 
 {% block content %}
-<h2>Confirm Delete</h2>
-<p>Are you sure you want to delete the client {{ client.name }}?</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit"class="btn btn-danger">Delete</button>
-    <a href="{% url 'client_list' %}"   class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container mt-5">
+    <h1>Are you sure you want to delete this client?</h1>
+    <p><strong>Client Name:</strong> {{ client.name }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a href="{% url 'client_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
 {% endblock %}

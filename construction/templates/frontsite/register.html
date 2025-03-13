@@ -8,33 +8,33 @@
 
 {% block content %}
 
-<div class="container well p-5" style="margin-top: 100px; max-width: 650px;">
+<div class="container well p-2 border rounded-3 d-flex justify-content-center" style="margin-top: 100px; max-width: 500px;">
     <div>
-        <h2 class="text-primary page-header text-center mb-4">Register Page</h2>
+        <h2 class=" page-header text-center mb-3 " style="color: rgb(15, 179, 176)">Register Page</h2>
         <form method="POST" autocomplete="off">
             {% csrf_token %}
-            <legend class="border-bottom mb-4">Join-Today</legend>
+            <legend class="border-bottom mb-3"  style="color: rgb(0, 41, 92)">Join-Today</legend>
             
             <div class="form-group row mb-3">
-                <label for="id_username" class="col-sm-3 col-form-label">Username :</label>
+                <label for="id_username" class="col-sm-3 col-form-label">Username:</label>
                 <div class="col-sm-9">
                     {{ form.username }}
                 </div>
             </div>
             <div class="form-group row mb-3">
-                <label for="id_email" class="col-sm-3 col-form-label">Email :</label>
+                <label for="id_email" class="col-sm-3 col-form-label">Email:</label>
                 <div class="col-sm-9">
                     {{ form.email }}
                 </div>
             </div>
             <div class="form-group row mb-3">
-                <label for="id_password1" class="col-sm-3 col-form-label" autocomplete="new-password">Password :</label>
+                <label for="id_password1" class="col-sm-3 col-form-label" autocomplete="new-password">Password:</label>
                 <div class="col-sm-9">
                     {{ form.password1 }}
                 </div>
             </div>
             <div class="form-group row mb-3">
-                <label for="id_password2" class="col-sm-3 col-form-label" autocomplete="new-password" >Confirm Password :</label>
+                <label for="id_password2" class="col-sm-3 col-form-label" autocomplete="new-password" >Confirm Password:</label>
                 <div class="col-sm-9">
                     {{ form.password2 }}
                 </div>

@@ -5,11 +5,32 @@
 {% bootstrap_javascript %}
 
 {% block title %}Expense List{% endblock %}
+
 {% block content %}
-  <h1>Expenses for {{ project.name }}</h1>
-  <ul>
-    {% for expense in expenses %}
-      <li><a href="{% url 'expense_details' project.id expense.id %}">{{ expense.description }}</a> - {{ expense.amount_spent }}</li>
-    {% endfor %}
-  </ul>
+  <h2>Expense List for {{ project.name }}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Amount Spent</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for expense in expenses %}
+        <tr>
+          <td>{{ expense.description }}</td>
+          <td>{{ expense.amount_spent }}</td>
+          <td>{{ expense.date }}</td>
+          <td>
+            <a href="{% url 'expense_details' project.id expense.id %}">View</a>
+            <a href="{% url 'expense_edit' project.id expense.id %}">Edit</a>
+            <a href="{% url 'expense_delete' project.id expense.id %}">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'expense_new' project.id %}">Add new expense</a>
 {% endblock %}

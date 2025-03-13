@@ -56,13 +56,50 @@ def client_delete_view(request, client_id):
         
     return render(request, 'projectsite/client_delete.html', {'client': client})
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Client, Project, Stage, Expense, User
+import json
+
+@login_required
+def admin_dashboard_view(request):
+    # User Statistics
+    user_count = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    new_users = User.objects.filter(date_joined__month='current_month').count()  # Adjust the date filter as needed
+
+    # Project Statistics
+    total_projects = Project.objects.count()
+    ongoing_projects = Project.objects.filter(status='ongoing').count()
+    completed_projects = Project.objects.filter(status='completed').count()
+
+    # Client Information
+    total_clients = Client.objects.count()
+
+    # Data for Charts
+    project_names = [project.name for project in Project.objects.all()]
+    budgets = [float(project.budget) for project in Project.objects.all()]
+    total_spents = [float(sum(expense.amount_spent for expense in Expense.objects.filter(project=project))) for project in Project.objects.all()]
+
+    context = {
+        'user_count': user_count,
+        'active_users': active_users,
+        'new_users': new_users,
+        'total_projects': total_projects,
+        'ongoing_projects': ongoing_projects,
+        'completed_projects': completed_projects,
+        'total_clients': total_clients,
+        'project_names': json.dumps(project_names),
+        'budgets': json.dumps(budgets),
+        'total_spents': json.dumps(total_spents),
+    }
+    return render(request, 'projectsite/admindashboard.html', context)
 
 
 @login_required
 def client_dashboard_view(request):
     clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
-    if not clients.exists():
-        return render(request, 'projectsite/no_client.html')
+   
     
     projects = Project.objects.filter(client__in=clients)
     stages = Stage.objects.filter(project__in=projects)
@@ -156,6 +193,10 @@ def project_list_by_client(request, client_id):
     projects = Project.objects.filter(client=client)
     return render(request, 'projectsite/project_list_by_client.html', {'client': client, 'projects': projects})
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Client, Project, Expense
+
 @login_required
 def project_dashboard_view(request):
     clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
@@ -171,9 +212,9 @@ def project_dashboard_view(request):
     context = {
         'clients': clients,
         'projects': projects,
-        'project_names': json.dumps(project_names),
-        'budgets': json.dumps(budgets),
-        'total_spents': json.dumps(total_spents),
+        'project_names': project_names,  # Pass the list directly
+        'budgets': budgets,  # Pass the list directly
+        'total_spents': total_spents,  # Pass the list directly
     }
     return render(request, 'projectsite/projectdashboard.html', context)
 
@@ -215,23 +256,30 @@ def stage_edit(request, stage_id):
     return render(request, 'projectsite/stage_edit.html', {'form': form})
 
 def stage_delete(request, stage_id):
-    stage = get_object_or_404(Stage, id=stage_id)
+    stage = Stage.objects.get( id=stage_id)
     if request.method == 'POST':
         stage.delete()
         return redirect('stage_list', project_id=stage.project.id)
-    return render(request, 'projectsite/stage_confirm_delete.html', {'stage': stage})
+    return render(request, 'projectsite/stage_delete.html', {'stage': stage})
 
 
-# Expense view
-def expense_create(request):
+#Add new expense
+def expense_new(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
     if request.method == "POST":
         form = ExpenseForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('expense_list')
+            expense = form.save(commit=False)
+            expense.project = project
+            expense.save()
+            return redirect('expense_details', project_id=project.id, expense_id=expense.id)
     else:
         form = ExpenseForm()
-    return render(request, 'app/expense_form.html', {'form': form})
+    context = {
+        'project': project,
+        'form': form,
+    }
+    return render(request, 'projectsite/expense_edit.html', context)
 
 
 
@@ -245,6 +293,7 @@ def expense_list(request, project_id):
     }
     return render(request, 'projectsite/expense_list.html', context)
 
+# view expense details
 def expense_details(request, project_id, expense_id):
     project = get_object_or_404(Project, pk=project_id)
     expense = get_object_or_404(Expense, pk=expense_id, project=project)
@@ -253,6 +302,32 @@ def expense_details(request, project_id, expense_id):
         'expense': expense,
     }
     return render(request, 'projectsite/expense_details.html', context)
+
+#edit expense
+def expense_edit(request, project_id, expense_id):
+    project = get_object_or_404(Project, pk=project_id)
+    expense = get_object_or_404(Expense, pk=expense_id, project=project)
+    if request.method == "POST":
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            expense = form.save(commit=False)
+            expense.project = project
+            expense.save()
+            return redirect('expense_details', project_id=project.id, expense_id=expense.id)
+    else:
+        form = ExpenseForm(instance=expense)
+    context = {
+        'project': project,
+        'form': form,
+    }
+    return render(request, 'projectsite/expense_edit.html', context)
+
+#delete expense
+def expense_delete(request, project_id, expense_id):
+    project = get_object_or_404(Project, pk=project_id)
+    expense = get_object_or_404(Expense, pk=expense_id, project=project)
+    expense.delete()
+    return redirect('expense_list', project_id=project.id)
 
 
 @login_required

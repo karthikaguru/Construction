@@ -1,0 +1,109 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% block title %}Client Dashboard{% endblock %}
+
+{% block content %}
+        <div class="container-fluid">
+    <!-- Key Metrics Section -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    User Statistics
+                </div>
+                <div class="card-body">
+                    <p>Total Users: {{ user_count }}</p>
+                    <p>Active Users: {{ active_users }}</p>
+                    <p>New Users (This Month): {{ new_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    Project Statistics
+                </div>
+                <div class="card-body">
+                    <p>Total Projects: {{ total_projects }}</p>
+                    <p>Ongoing Projects: {{ ongoing_projects }}</p>
+                    <p>Completed Projects: {{ completed_projects }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    Client Information
+                </div>
+                <div class="card-body">
+                    <p>Total Clients: {{ total_clients }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Graphs Section -->
+    <div class="row">
+        <div class="col-lg-6">
+            <canvas id="chart1"></canvas>
+        </div>
+        <div class="col-lg-6">
+            <canvas id="chart2"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var projectNames = JSON.parse('{{ project_names|escapejs }}');
+    var budgets = JSON.parse('{{ budgets|escapejs }}');
+    var totalSpents = JSON.parse('{{ total_spents|escapejs }}');
+    
+    var ctx1 = document.getElementById('chart1').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: projectNames,
+            datasets: [{
+                label: 'Budget',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                data: budgets
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    var ctx2 = document.getElementById('chart2').getContext('2d');
+    new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: projectNames,
+            datasets: [{
+                label: 'Total Spent',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                data: totalSpents
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
