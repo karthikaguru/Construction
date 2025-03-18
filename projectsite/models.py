@@ -1,6 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(
+        max_length=20,
+        choices=[('Admin', 'Admin'), ('Team User', 'Team User'), ('Client', 'Client')]
+    )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"
+
+
 class Client(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -67,7 +79,7 @@ class Stage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='stages')
     name = models.CharField(max_length=100)
     due_date = models.DateField()
-    completed = models.CharField(max_length=2, choices=COMPLETED_CHOICES, default='P')
+    completed = models.CharField(max_length=50, choices=COMPLETED_CHOICES, default='P')
     progress = models.IntegerField(default=0)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)

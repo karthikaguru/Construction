@@ -22,40 +22,45 @@
 
 {% block scripts %}
 <script>
-    var projectNames = {{ project_names }};
-    var budgets = {{ budgets|safe }};
-    var totalSpents = {{ total_spents|safe }};
+fetch('/path/to/all_projects_dashboard_view')
+    .then(response => response.json())
+    .then(data => {
+        var projectNames = data.project_names;
+        var budgets = data.budgets;
+        var totalSpents = data.total_spents;
 
-    console.log("Project Names: ", projectNames);
-    console.log("Budgets: ", budgets);
-    console.log("Total Spent: ", totalSpents);
+        console.log("Project Names: ", projectNames);
+        console.log("Budgets: ", budgets);
+        console.log("Total Spent: ", totalSpents);
 
-    var ctx = document.getElementById('budgetChart').getContext('2d');
-    var budgetChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: projectNames,
-            datasets: [{
-                label: 'Budget',
-                data: budgets,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }, {
-                label: 'Total Spent',
-                data: totalSpents,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+        var ctx = document.getElementById('budgetChart').getContext('2d');
+        var budgetChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: projectNames,
+                datasets: [{
+                    label: 'Budget',
+                    data: budgets,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Total Spent',
+                    data: totalSpents,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    })
+    .catch(error => console.error('Error fetching data:', error));
 </script>
 {% endblock %}

@@ -20,6 +20,7 @@ class ExpenseAdmin(admin.ModelAdmin):
     search_fields = ('description', 'project__name')
     list_filter = ('project', 'date')
 
+
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Stage, StageAdmin)

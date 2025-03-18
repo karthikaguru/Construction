@@ -6,64 +6,63 @@
 {% block title %}Client Dashboard{% endblock %}
 
 {% block content %}
-<div class="col-12 container mt-5">
-    <h1>Client Dashboard</h1>
+  <h1>Client Dashboard</h1>
+  
+  <!-- Displaying Clients and Their Projects -->
+  <h2>Clients and Projects</h2>
+  <ul>
     {% for client in clients %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h2> Welcome, {{ client.name }}</h2>
-                <p>
-                    <strong>Phone Number:</strong> {{ client.phone_number }}<br>
-                    <strong>Email:</strong> {{ client.email }}<br>
-                    <strong>Site Location:</strong> {{ client.site_location }}<br>
-                    <strong>Site Name:</strong> {{ client.site_name }}<br>
-                </p>
-                <section>
-                    <h3>Your Projects</h3>
-                    <ul>
-                        {% for project in projects %}
-                            {% if project.client == client %}
-                                <li><a href="{% url 'project_details' project.id %}">{{ project.name }}</a></li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </section>
-                <section>
-                    <h3>Project Stages</h3>
-                    <ul>
-                        {% for stage in stages %}
-                            {% if stage.project.client == client %}
-                                <li>{{ stage.project.name }} - {{ stage.name }}: Progress - {{ stage.progress }}%</li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </section>
-                <section>
-                    <h3>Project Budgets and Expenditures</h3>
-                    <ul>
-                        {% for project in projects %}
-                            {% if project.client == client %}
-                                {% with forloop.counter0 as counter %}
-                                    <li>{{ project.name }}: Budget - {{ project.budget }}, Total Spent - {{ total_spents.counter }}</li>
-                                {% endwith %}
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </section>
-                <section>
-                    <footer>
-                        <a href="{% url 'client_edit' client.id %}">Edit Profile</a> |
-                        <a href="{% url 'logout' %}">Logout</a>
-                    </footer>
-                </section>
-                
-            </div>
-        </div>
+      <li>
+        <strong>{{ client.name }}</strong>
+        <ul>
+          {% for project in client.project_set.all %}
+            <li>{{ project.name }} - Budget: {{ project.budget }}</li>
+          {% endfor %}
+        </ul>
+      </li>
     {% endfor %}
-</div>
+  </ul>
 
-<!-- Include your script here -->
-{% block scripts %}
-<script src="{% static 'path/to/your/script.js' %}"></script>{% endblock %}
+  <!-- Adding charts (if required) -->
+  <h2>Project Budgets and Total Spent</h2>
+  <canvas id="projectChart"></canvas>
+
+  <script>
+    var projectNames = JSON.parse('{{ project_names|escapejs }}');
+    var budgets = JSON.parse('{{ budgets|escapejs }}');
+    var totalSpents = JSON.parse('{{ total_spents|escapejs }}');
+
+    var ctx = document.getElementById('projectChart').getContext('2d');
+    var projectChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: projectNames,
+            datasets: [{
+                label: 'Budget',
+                data: budgets,
+                backgroundColor: 'blue',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Total Spent',
+                data: totalSpents,
+                backgroundColor: 'red',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    </script>
+    
+ 
+    
 
 {% endblock %}

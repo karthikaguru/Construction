@@ -1,4 +1,4 @@
-{% extends 'frontsite/index.html' %}
+{% extends 'projectsite/base.html' %}
 {% load static %}
 {% load bootstrap5 %}
 {% bootstrap_css %}
@@ -8,9 +8,16 @@
 
 {% block content %}
 
-<div class="container well p-2 border rounded-3 d-flex justify-content-center" style="margin-top: 100px; max-width: 500px;">
-    <div>
-        <h2 class=" page-header text-center mb-3 " style="color: rgb(15, 179, 176)">Register Page</h2>
+<div class="container well p-2  d-flex justify-content-center " style="margin: 100px;margin-left:560px; max-width:450px;">
+    <div class="text-light" style="width: 100%; margin-left:45px;">
+        <h2 class=" page-header text-center mb-3 " style="color: rgb(3, 108, 106);">Register </h2>
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{message.tags}}">
+                {{message}}
+            </div>
+        {% endfor %}
+        {% endif %}
         <form method="POST" autocomplete="off">
             {% csrf_token %}
             <legend class="border-bottom mb-3"  style="color: rgb(0, 41, 92)">Join-Today</legend>
@@ -43,8 +50,8 @@
             <div class="form-group mb-3">
                 <button class="btn btn-primary text-light" type="submit">Sign Up</button>
             </div>
-            <div class="border-top pt-3">
-                <small class="text-secondary">
+            <div class="border-top pt-3 pb-2">
+                <small class="text-muted">
                     Already have an account? <a href="{% url 'login' %} ">Sign in</a>
                 </small>
             </div>
