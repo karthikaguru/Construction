@@ -1,14 +1,11 @@
 from pathlib import Path
 import os
-import environ
+
 
 # Initialize environment variables
-env = environ.Env()
-environ.Env.read_env(os.path.join(os.path.dirname(__file__), '../.env'))
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
-environ.Env.read_env(env_file)
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
@@ -92,7 +89,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        },
     },
+
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
@@ -100,6 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -122,8 +124,9 @@ STATICFILES_DIRS = [
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-LOGIN_REDIRECT_URL = 'site/client/create/'
+LOGIN_URL = '/login/'
+
+LOGIN_REDIRECT_URL = 'site/manage-projects/'
 
 # For debugging, print loaded email variables
-print(f"EMAIL_HOST_USER: {env('EMAIL_HOST_USER', default='Not Set')}")
-print(f"EMAIL_HOST_PASSWORD: {env('EMAIL_HOST_PASSWORD', default='Not Set')}")
+
