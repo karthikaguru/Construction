@@ -1,0 +1,15 @@
+{% extends 'projectsite/base.html' %}
+{% block title %}Add Stage{% endblock %}
+{% block content %}
+<div class="container-fluid create well table-responsive p-4" style="margin-left:25em ;width:632px;margin-top:4em">
+    <div class="container">
+        <h1>{{ stage.name|default:"Create a New Stage" }}</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Save</button>
+            <a href="{% url 'stage_list' project.id %}" class="btn btn-secondary">Cancel</a>
+        </form>
+</div>
+</div>
+{% endblock %}

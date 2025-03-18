@@ -3,50 +3,41 @@ from .forms import ClientForm, ProjectForm,StageForm,ExpenseForm
 from .models import Client, Project, Stage, Expense, User
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Sum
-from django.core.exceptions import PermissionDenied
-
+from django.core.serializers.json import DjangoJSONEncoder
 from datetime import date
 import json
-
-def is_admin(user):
-    return hasattr(user, 'profile') and user.profile.role == 'Admin'
-
-def is_team_user(user):
-    return hasattr(user, 'profile') and user.profile.role == 'Team User'
-
-def is_client(user):
-    return hasattr(user, 'profile') and user.profile.role == 'Client'
 
 
 @login_required
 def manage_projects(request):
-    # Logic for Admin to manage the project lifecycle
+    # Fetch all projects
     projects = Project.objects.all()
     
-    # Optionally, add filters based on status or client
+    # Apply optional filters based on status or client
     status_filter = request.GET.get('status')  # Get status filter from URL query parameters
     client_filter = request.GET.get('client')  # Get client filter from URL query parameters
 
     if status_filter:
-        projects = projects.filter(status=status_filter)
+        projects = projects.filter(stages__status=status_filter)  # Filtering based on Stage status
     if client_filter:
-        projects = projects.filter(client__id=client_filter)
-    
-    # Handle additional actions like deletion
+        projects = projects.filter(client__id=client_filter)  # Filtering by Client
+
+    # Handle POST requests for additional actions (e.g., deletion)
     if request.method == 'POST':
-        project_id = request.POST.get('delete_project')  # Assume a button to delete projects
+        project_id = request.POST.get('delete_project')
         if project_id:
             project = get_object_or_404(Project, id=project_id)
             project.delete()
-            return redirect('manage_projects')  # Redirect to same view after deletion
-    
+            return redirect('manage_projects')
+
     # Pass data to the template
     context = {
         'projects': projects,
-        'status_options': Project.STATUS_CHOICES,  # Assuming you have status choices defined
-        'clients': Client.objects.all(),  # For client filtering if necessary
+        'status_options': Stage.STATUS_CHOICES,  # Status choices for filtering (from Stage model)
+        'clients': Client.objects.all(),  # List of clients for filtering
     }
     return render(request, 'projectsite/admin/manage_projects.html', context)
+
 
 @login_required
 def team_dashboard_view(request):
@@ -103,7 +94,7 @@ def view_project_details(request, project_id):
 
 
 
-@user_passes_test(is_admin)
+@login_required
 def client_create_view(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
@@ -119,76 +110,203 @@ def client_create_view(request):
 
 
 @login_required
-@user_passes_test(is_admin)  # Only Admins can view all client details
-def client_details(request, client_id):
-    client = get_object_or_404(Client, id=client_id)
-    return render(request, 'projectsite/client/client_details.html', {'client': client})
-
-@login_required
-@user_passes_test(is_team_user)
 def client_details(request, client_id):
     client = Client.objects.get(id=client_id, user=request.user)
     return render(request, 'projectsite/client/client_details.html', {'client': client})
 
 
 
-@login_required
-@user_passes_test(is_admin) 
-def client_edit_view(request, pk):
-    client = get_object_or_404(Client, pk=pk)
-    if request.method == 'POST':
-        form = ClientForm(request.POST, instance=client)
-        if form.is_valid():
-            client = form.save()
-            return redirect('client_list')
-    else:
-        form = ClientForm(instance=client)
-    return render(request, 'projectsite/client/client_edit.html', {'form': form})
 
 @login_required
-@user_passes_test(is_team_user)  # Restrict editing to Team Users for their clients
-def client_edit_view(request, pk):
-    client = get_object_or_404(Client, pk=pk, user=request.user)
+def client_edit_view(request, client_id):
+    client = get_object_or_404(Client, id=client_id, user=request.user)
+    
     if request.method == 'POST':
-        form = ClientForm(request.POST, instance=client)
+        form = ClientForm(request.POST, request.FILES, instance=client)
         if form.is_valid():
             form.save()
             return redirect('client_list')
     else:
         form = ClientForm(instance=client)
-    return render(request, 'projectsite/client/client_edit.html', {'form': form})
+        
+    return render(request, 'projectsite/client/client_edit.html', {'form': form, 'client': client})
+
+
+
 
 @login_required
-@user_passes_test(is_admin)  # Admin can view all clients
+def client_delete_view(request, client_id):
+    client =Client.objects.get(id=client_id, user=request.user)
+    
+    if request.method == 'POST':
+        client.delete()
+        return redirect('client_list')
+        
+    return render(request, 'projectsite/client/client_delete.html', {'client': client})
+
+
+@login_required
+ #@user_passes_test(is_client)
+def client_dashboard_view(request):
+    clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
+   
+    
+
+    projects = Project.objects.filter(client__in=clients).annotate(total_spent=Sum('expense__amount_spent'))
+    stages = Stage.objects.filter(project__in=projects)
+    expenses = Expense.objects.filter(project__in=projects)
+
+    project_names = [project.name for project in projects]
+    budgets = [float(project.budget) for project in projects]
+    total_spents = [float(sum(expense.amount_spent for expense in Expense.objects.filter(project=project))) for project in projects]
+
+    context = {
+    'clients': clients,
+    'projects': projects,
+    'project_names': json.dumps(project_names, cls=DjangoJSONEncoder),
+    'budgets': json.dumps(budgets, cls=DjangoJSONEncoder),
+    'total_spents': json.dumps(total_spents, cls=DjangoJSONEncoder),
+    'stages': stages,
+    'expenses': expenses,
+}
+    print("Projects:", projects)
+    print("Stages:", stages)
+    print("Expenses:", expenses)
+    print("Project Names:", project_names)
+    print("Budgets:", budgets)
+    print("Total Spents:", total_spents)
+
+    return render(request, 'projectsite/clientdashboard.html', context)
+
+
 def client_list(request):
     clients = Client.objects.all()
     return render(request, 'projectsite/client/client_list.html', {'clients': clients})
 
+def project_list(request, client_id=None):
+    if client_id:
+        projects = Project.objects.filter(client_id=client_id)
+    else:
+        projects = Project.objects.all()
+    return render(request, 'projectsite/project/project_list.html', {'projects': projects})
 
 
-# For Team Users to view only their clients
 @login_required
-@user_passes_test(is_team_user)
-def client_list_view(request):
+def project_details(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    return render(request, 'projectsite/project/project_detail.html', {'project': project})
+
+
+@login_required
+def project_add_view(request):
     clients = Client.objects.filter(user=request.user)
-    return render(request, 'projectsite/client/client_list.html', {'clients': clients})
+    
+    if request.method == 'POST' and 'selected_client' in request.POST:
+        selected_client_id = request.POST.get('selected_client')
+        client = get_object_or_404(Client, id=selected_client_id, user=request.user)
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.client = client  # Assign the selected client to the project
+            project.save()
+            return redirect('project_list')
+    else:
+        if clients.exists() and clients.count() == 1:
+            client = clients.first()
+            form = ProjectForm()
+            return render(request, 'projectsite/project_add.html', {'form': form, 'client': client})
+        elif clients.exists() and clients.count() > 1:
+            return render(request, 'projectsite/select_client.html', {'clients': clients})
+        else:
+            return redirect('client_create')
+
+    return render(request, 'projectsite/project_add.html', {'form': form, 'client': client})
 
 
 
 
 @login_required
-@user_passes_test(is_admin)
-def client_delete_view(request, pk):
-    client = get_object_or_404(Client, pk=pk)
+def project_edit_view(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
     if request.method == 'POST':
-        client.delete()
-        return redirect('client_list')
-    return render(request, 'projectsite/client/client_delete.html', {'client': client})
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return redirect('/site/success/')  # Change to your success URL
+    else:
+        form = ProjectForm(instance=project)
+    return render(request, 'projectsite/project/project_edit.html', {'form': form})
+
+
+@login_required
+def project_delete_view(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+        project.delete()
+        return redirect('/site/success/')  # Change to your success URL
+    return render(request, 'projectsite/project/project_delete.html', {'project': project})
+
+@login_required
+def project_dashboard_view(request):
+    clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
+    if not clients.exists():
+        # Redirect to a page where user can create a Client profile or display a friendly message
+        return render(request, 'projectsite/no_client.html')
+    
+    projects = Project.objects.filter(client__in=clients)
+    project_names = [project.name for project in projects]
+    budgets = [float(project.budget) for project in projects]
+    total_spents = [float(sum(expense.amount_spent for expense in Expense.objects.filter(project=project))) for project in projects]
+
+    context = {
+        'clients': clients,
+        'projects': projects,
+        'project_names': json.dumps(project_names),
+        'budgets': json.dumps(budgets),
+        'total_spents': json.dumps(total_spents),
+    }
+    return render(request, 'projectsite/projectdashboard.html', context)
+
+
 
 
 
 @login_required
-@user_passes_test(is_admin)
+def status_update_view(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    stages = Stage.objects.filter(project=project)
+    expenses = Expense.objects.filter(project=project)
+
+    if request.method == 'POST':
+        form = StageForm(request.POST)
+        if form.is_valid():
+            stage = form.save(commit=False)
+            if not stage.start_date:
+                stage.start_date = form.cleaned_data.get('start_date')  # Ensure start_date is set
+            stage.save()
+            return redirect('/site/success/') 
+    else:
+        form = StageForm()
+
+    total_spent = sum(expense.amount_spent for expense in expenses)
+    budget = project.budget
+    balance = budget - total_spent
+    stage_names = [stage.name for stage in stages]
+    stage_progress = [stage.progress for stage in stages]
+
+    context = {
+        'project': project,
+        'stages': stages,
+        'form': form,
+        'total_spent': total_spent,
+        'balance': balance,
+        'stage_names': stage_names,
+        'stage_progress': stage_progress,
+    }
+    return render(request, 'projectsite/status_update.html', context)
+
+@login_required
+#@user_passes_test(is_admin)
 def admin_dashboard_view(request):
     # User Statistics
     user_count = User.objects.count()
@@ -234,66 +352,15 @@ def admin_dashboard_view(request):
     return render(request, 'projectsite/admindashboard.html', context)
 
 
-
-@login_required
-@user_passes_test(is_client)
-def client_dashboard_view(request):
-    clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
-   
-    
-    projects = Project.objects.filter(client__in=clients)
-    stages = Stage.objects.filter(project__in=projects)
-    expenses = Expense.objects.filter(project__in=projects)
-
-    project_names = [project.name for project in projects]
-    budgets = [float(project.budget) for project in projects]
-    total_spents = [float(sum(expense.amount_spent for expense in Expense.objects.filter(project=project))) for project in projects]
-
-    context = {
-        'clients': clients,
-        'projects': projects,
-        'project_names': json.dumps(project_names),
-        'budgets': json.dumps(budgets),
-        'total_spents': json.dumps(total_spents),
-        'stages': stages,
-        'expenses': expenses,
-    }
-    return render(request, 'projectsite/clientdashboard.html', context)
-
-
 # List all projects
 @login_required
-@user_passes_test(is_admin)  
+ #@user_passes_test(is_admin)  
 def project_list(request):
     projects = Project.objects.all()
     return render(request, 'projectsite/project/project_list.html', {'projects': projects})
 
-def has_project_access(user):
-    if not (is_admin(user) or is_team_user(user) or is_client(user)):
-        raise PermissionDenied
-
 @login_required
-@user_passes_test(has_project_access)
-def project_details(request, project_id):
-    # Admins can view all projects
-    if is_admin(request.user):
-        project = get_object_or_404(Project, id=project_id)
-    # Team Users can view projects linked to their assigned clients
-    elif is_team_user(request.user):
-        project = get_object_or_404(Project, id=project_id, client__user=request.user)
-    # Clients can only view their own projects
-    elif is_client(request.user):
-        project = get_object_or_404(Project, id=project_id, client__user=request.user)
-    else:
-        # Raise permission denied if none of the roles match
-        raise PermissionDenied
-
-    # Render project details
-    return render(request, 'projectsite/project/project_details.html', {'project': project})
-
-# Create a new project
-@login_required
-@user_passes_test(is_admin)
+# Create a new project only for admin
 def project_add_view(request):
     if request.method == "POST":
         form = ProjectForm(request.POST)
@@ -307,34 +374,15 @@ def project_add_view(request):
 
 
 @login_required
-@user_passes_test(is_team_user)    # Allow only Team Users
+ # @user_passes_test(is_team_user) #Allow only Team Users
 def project_list_view(request):
     projects = Project.objects.filter(client__user=request.user)
     return render(request, 'projectsite/project_list.html', {'projects': projects})
 
-# Edit an existing project
-
-def can_edit_project(user):
-    return is_admin(user) or is_team_user(user) or is_client(user)
-
 @login_required
-@user_passes_test(can_edit_project)  # Allow Admins, Team Users, and Clients
+ # Allow Admins, Team Users, and Clients  Admins can edit any projec
 def project_edit_view(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-
-    # Admins can edit any project
-    if is_admin(request.user):
-        pass  # Admins have full access
-
-    # Team Users can only edit projects linked to their assigned clients
-    elif is_team_user(request.user) and project.client.user != request.user:
-        raise PermissionDenied
-
-    # Clients can only edit their own projects
-    elif is_client(request.user) and project.client.user != request.user:
-        raise PermissionDenied
-
-    # Handle GET and POST requests
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
@@ -343,7 +391,6 @@ def project_edit_view(request, project_id):
     else:
         form = ProjectForm(instance=project)
     return render(request, 'projectsite/project/project_edit.html', {'form': form})
-
 
 @login_required
 def project_delete_view(request, project_id):
@@ -358,9 +405,6 @@ def project_list_by_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)
     projects = Project.objects.filter(client=client)
     return render(request, 'projectsite/project/project_list_by_client.html', {'client': client, 'projects': projects})
-
-
-
 @login_required
 def project_dashboard_view(request):
     clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
@@ -383,14 +427,9 @@ def project_dashboard_view(request):
     return render(request, 'projectsite/projectdashboard.html', context)
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  # Allow Admins and Team Users
+ # Allow Admins and Team Users
 def stage_create(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-
-    # Restrict Team Users to their assigned projects
-    if is_team_user(request.user) and project.client.user != request.user:
-        raise PermissionDenied
-
     if request.method == 'POST':
         form = StageForm(request.POST)
         if form.is_valid():
@@ -404,14 +443,13 @@ def stage_create(request, project_id):
 
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  # Allow Admins and Team Users
+ # Allow Admins and Team Users
 def stage_edit(request, stage_id):
     stage = get_object_or_404(Stage, id=stage_id)
     project = stage.project
 
     # Restrict Team Users to their assigned projects
-    if is_team_user(request.user) and project.client.user != request.user:
-        raise PermissionDenied
+    
 
     if request.method == 'POST':
         form = StageForm(request.POST, instance=stage)
@@ -424,15 +462,12 @@ def stage_edit(request, stage_id):
     return render(request, 'projectsite/stage/stage_edit.html', {'form': form, 'project': project})
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  # Allow Admins and Team Users
+  # Allow Admins and Team Users
 def stage_delete(request, stage_id):
     stage = get_object_or_404(Stage, id=stage_id)
     project_id = stage.project.id
 
     # Restrict Team Users to their assigned projects
-    if is_team_user(request.user) and stage.project.client.user != request.user:
-        raise PermissionDenied
-
     if request.method == 'POST':
         stage.delete()
         return redirect('project_details', project_id=project_id)
@@ -440,62 +475,37 @@ def stage_delete(request, stage_id):
 
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u) or is_client(u))  # Allow all roles
+  # Allow all roles
 def stages_list_by_client(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-
-    # Restrict Team Users and Clients to their assigned projects
-    if (is_team_user(request.user) or is_client(request.user)) and project.client.user != request.user:
-        raise PermissionDenied
-
     stages = Stage.objects.filter(project=project)
     return render(request, 'projectsite/stage/stage_list_by_client.html', {'project': project, 'stages': stages})
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u) or is_client(u))  # Allow all roles
+ # Allow all roles
 def stage_details(request, project_id, stage_id):
     project = get_object_or_404(Project, id=project_id)
     stage = get_object_or_404(Stage, id=stage_id, project=project)
-
-    # Restrict Team Users and Clients to their assigned projects
-    if (is_team_user(request.user) or is_client(request.user)) and project.client.user != request.user:
-        raise PermissionDenied
 
     stages = Stage.objects.filter(project=project)
     return render(request, 'projectsite/stage/stage_details.html', {'stage': stage, 'project': project, 'stages': stages})
 
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u) or is_client(u))  # Allow all roles
+ # Allow all roles
 def stage_list(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
     # Restrict Team Users and Clients to their assigned projects
-    if (is_team_user(request.user) or is_client(request.user)) and project.client.user != request.user:
-        raise PermissionDenied
-
     stages = Stage.objects.filter(project=project)
     return render(request, 'projectsite/stage/stage_list.html', {'project': project, 'stages': stages})
 
 
-
-def can_access_expense(user, project):
-    if is_admin(user):
-        return True
-    elif is_team_user(user) and project.client.user == user:
-        return True  # Team Users can access expenses of their assigned clients
-    elif is_client(user) and project.client.user == user:
-        return True  # Clients can view their own project expenses
-    return False
-
-
-#Add new expense
+#Add new expense  Allow Admins and Team Users
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  # Allow Admins and Team Users
 def expense_new(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-    if not can_access_expense(request.user, project):
-        raise PermissionDenied
+   
 
     if request.method == "POST":
         form = ExpenseForm(request.POST)
@@ -515,12 +525,9 @@ def expense_new(request, project_id):
 
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u) or is_client(u))  # Allow all roles
+ # Allow all roles
 def expense_list(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
-    if not can_access_expense(request.user, project):
-        raise PermissionDenied
-
     expenses = Expense.objects.filter(project=project)
     context = {
         'project': project,
@@ -530,12 +537,9 @@ def expense_list(request, project_id):
 
 # view expense details
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u) or is_client(u))  # Allow all roles
+# Allow all roles
 def expense_details(request, project_id, expense_id):
     project = get_object_or_404(Project, pk=project_id)
-    if not can_access_expense(request.user, project):
-        raise PermissionDenied
-
     expense = get_object_or_404(Expense, pk=expense_id, project=project)
     context = {
         'project': project,
@@ -545,12 +549,10 @@ def expense_details(request, project_id, expense_id):
 
 #edit expense
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  # Allow Admins and Team Users
+# Allow Admins and Team Users
 def expense_edit(request, project_id, expense_id):
     project = get_object_or_404(Project, pk=project_id)
-    if not can_access_expense(request.user, project):
-        raise PermissionDenied
-
+    
     expense = get_object_or_404(Expense, pk=expense_id, project=project)
     if request.method == "POST":
         form = ExpenseForm(request.POST, instance=expense)
@@ -567,13 +569,12 @@ def expense_edit(request, project_id, expense_id):
     }
     return render(request, 'projectsite/expense/expense_edit.html', context)
 
-#delete expense
+#delete expense # Allow Admins and Team Users
+
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  # Allow Admins and Team Users
 def expense_delete(request, project_id, expense_id):
     project = get_object_or_404(Project, pk=project_id)
-    if not can_access_expense(request.user, project):
-        raise PermissionDenied
+  
 
     expense = get_object_or_404(Expense, pk=expense_id, project=project)
     expense.delete()
@@ -581,7 +582,7 @@ def expense_delete(request, project_id, expense_id):
 
 
 @login_required
-@user_passes_test(lambda u: is_admin(u) or is_team_user(u))  
+# admin or team user
 def status_update_view(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     stages = Stage.objects.filter(project=project)

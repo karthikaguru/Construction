@@ -6,10 +6,13 @@
 {% block title %}Client Dashboard{% endblock %}
 
 {% block content %}
+
+
+<div class="container mt-5 d-flex flex-column align-items-center">
+  <div class="content-section text-center "style="margin-left:16em; margin-top:5em;width:550px">
   <h1>Client Dashboard</h1>
   
   <!-- Displaying Clients and Their Projects -->
-  <h2>Clients and Projects</h2>
   <ul>
     {% for client in clients %}
       <li>
@@ -25,44 +28,46 @@
 
   <!-- Adding charts (if required) -->
   <h2>Project Budgets and Total Spent</h2>
-  <canvas id="projectChart"></canvas>
-
-  <script>
-    var projectNames = JSON.parse('{{ project_names|escapejs }}');
-    var budgets = JSON.parse('{{ budgets|escapejs }}');
-    var totalSpents = JSON.parse('{{ total_spents|escapejs }}');
-
-    var ctx = document.getElementById('projectChart').getContext('2d');
-    var projectChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: projectNames,
-            datasets: [{
-                label: 'Budget',
-                data: budgets,
-                backgroundColor: 'blue',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }, {
-                label: 'Total Spent',
-                data: totalSpents,
-                backgroundColor: 'red',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-    
-    </script>
-    
+  <canvas id="projectBudgetChart"></canvas>
+  {%block script%}
  
-    
+<script>
+  const ctx = document.getElementById('projectBudgetChart').getContext('2d');
+  const projectNames = JSON.parse('{{ project_names|safe }}');
+  const budgets = JSON.parse('{{ budgets|safe }}');
+  const totalSpents = JSON.parse('{{ total_spents|safe }}');
 
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: projectNames,
+      datasets: [
+        {
+          label: 'Budget',
+          data: budgets,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        },
+        {
+          label: 'Total Spent',
+          data: totalSpents,
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
+  });
+</script>
+
+
+
+{%endblock%}
+    
+</div>
+</div>
 {% endblock %}
+

@@ -126,7 +126,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 LOGIN_URL = '/login/'
 
-LOGIN_REDIRECT_URL = 'site/manage-projects/'
+LOGIN_REDIRECT_URL = 'site/client/create/'
 
 # For debugging, print loaded email variables
 

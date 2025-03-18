@@ -1,0 +1,99 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}Team Dashboard Details{% endblock %}
+{% block content %}
+<h1>Team Dashboard</h1>
+
+<!-- Statistics Section -->
+<div>
+    <h2>Statistics</h2>
+    <p>Ongoing Projects: {{ ongoing_projects }}</p>
+    <p>Completed Projects: {{ completed_projects }}</p>
+    <p>Total Expenses: ₹{{ total_expenses }}</p>
+</div>
+
+<!-- Project List Section -->
+<div>
+    <h2>Projects</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Status</th>
+                <th>Budget</th>
+                <th>Total Spent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project, total_spent in projects|zip(total_spents) %}
+            <tr>
+                <td>{{ project.name }}</td>
+                <td>{{ project.get_status_display }}</td>
+                <td>₹{{ project.budget }}</td>
+                <td>₹{{ total_spent }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No projects found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Chart Section (Optional) -->
+<div>
+    <h2>Project Budgets</h2>
+    <canvas id="budgetChart"></canvas>
+</div>
+
+
+<script>
+    // Parsing JSON data from context
+    const projectNames = JSON.parse('{{ project_names|escapejs }}'); // Escapes special characters for safe JavaScript
+    const budgets = JSON.parse('{{ budgets|escapejs }}');
+    const totalSpents = JSON.parse('{{ total_spents|escapejs }}');
+
+    // Setting up the chart
+    const ctx = document.getElementById('budgetChart').getContext('2d');
+    const budgetChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: projectNames, // Project names as chart labels
+            datasets: [
+                {
+                    label: 'Budget',
+                    data: budgets, // Budget data
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'Total Spent',
+                    data: totalSpents, // Total spent data
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top', // Position of the chart legend
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true, // Start Y-axis from zero
+                },
+            },
+        },
+    });
+</script>
+{%endblock%}

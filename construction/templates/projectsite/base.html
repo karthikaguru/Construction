@@ -83,15 +83,16 @@
                             <li><a href="{% url 'project_list' %}" class="text-white">Project List</a></li>
                             <li><a href="{% url 'project_add' %}" class="text-white">Project Add</a></li>
                             <!--i included stages here-->
-                            {% for stage in stages %}
-                            <li>
-                                <a href="{% url 'stage_details' project.id stage.id %}" class="text-white">
-                                    {{ stage.name }}
-                                </a>
-                            </li>
-                           {% endfor %}
-                         
-                        
+
+                                {% for stage in stages %}
+                                <li>
+                                    <a href="{% url 'stage_details' stage.project.id stage.id %}" class="text-white">
+                                        {{ stage.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+
+                
                         </ul>
                     </div>
                     
