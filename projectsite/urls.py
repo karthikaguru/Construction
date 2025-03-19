@@ -7,7 +7,7 @@ urlpatterns = [
     path('manage-projects/', views.manage_projects, name='manage_projects'),
     path('client/create/', views.client_create_view, name='client_create'),
     path('client/<int:client_id>/', views.client_details, name='client_details'),
-    path('client/<int:pk>/edit/', views.client_edit_view, name='client_edit'),
+    path('client/<int:client_id>/edit/', views.client_edit_view, name='client_edit'),
     path('client/<int:pk>/delete/', views.client_delete_view, name='client_delete'),
     path('clients/', views.client_list, name='client_list'),
     
@@ -15,7 +15,8 @@ urlpatterns = [
     # Dashboard URLs
     path('team/dashboard/', views.team_dashboard_view, name='team_dashboard'),
     path('client/dashboard/', views.client_dashboard_view, name='client_dashboard_view'),
-    path('dashboard/', views.project_dashboard_view, name='project_dashboard_view'),
+    path('admin_dashboard',views.admin_dashboard_view,name='admin_dashboard'),
+    
 
     # Success and Status Update URLs
     path('status-update/<int:project_id>/', views.status_update_view, name='status_update'),

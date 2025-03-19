@@ -25,7 +25,7 @@
         <td>{{ expense.date }}</td>
         <td>{{ project.name }}</td>
         <td><a href="{% url 'expense_edit' project.id expense.id %}" class="btn btn-warning text-light">Update</a>
-          <a href="{% url 'expense_list' project.id %}"class="btn btn-primary mt-3">Back to list</a></td>
+          <a href="{% url 'expense_list' project.id %}"class="btn btn-primary m-2">Back to list</a></td>
       </tr>
     </tbody>
   </table>

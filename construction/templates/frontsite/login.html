@@ -4,32 +4,76 @@
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 
-{% block title %}Login {% endblock %}
+{% block title %}Login - Leaf Construction{% endblock %}
 
 {% block content %}
-<div class="container well  " style="margin:130px;margin-left:560px; display: flex; justify-content: center; align-items: center; width: 450px; height: 350px;">
-    <div class="content-section text-light" style="text-align: center;">
-        <h1 class="m-2 p-2" style="color: rgb(3, 108, 106);">Login </h1>
-        <div class="m-2 p-2">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{message.tags}}">
-                        {{message}}
-                    </div>
-                {% endfor %}
-            {% endif %}
-            <form method="POST" autocomplete="off">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="d-flex justify-content-start p-2">
-                    <button class="btn btn-primary text-light" >Login</button>
-                    <a class="ms-3 mt-1" href="{% url 'register' %}">Sign Up</a>
+<div class="container-fluid create well table-responsive d-flex justify-content-center align-items-center" style="margin-left:25em;width: 500px; margin-top: 11em;">
+    <div class="row p-3">
+        <!-- Brand Heading -->
+        <h1 class="pb-3 text-center" style="color: rgb(75, 42, 165);">Leaf Construction</h1>
+
+        <!-- Display Django Messages -->
+        {% if messages %}
+                  {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                      
+                   </div>
+                  {% endfor %}
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <!-- Username Field -->
+            <div class="form-group row mb-3">
+                <label for="username" class="col-sm-3 col-form-label">Username:</label>
+                <div class="col-sm-9">
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username" 
+                        placeholder="Enter your username" 
+                        class="form-control" 
+                        required
+                    >
                 </div>
-                <p  class="d-flex justify-content-start p-2">
-                    <a href="{% url 'password_reset' %}" class="text-decoration">Forgot your password?</a>
-                </p>
-                </form>
-        </div>
+            </div>
+            
+            <!-- Password Field -->
+            <div class="form-group row mb-3">
+                <label for="password" class="col-sm-3 col-form-label">Password:</label>
+                <div class="col-sm-9">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password" 
+                        placeholder="Enter your password" 
+                        class="form-control" 
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary px-3">Login</button>
+            </div>
+        </form>
+
+        <!-- Register Link -->
+        <p class="text-center mt-3">
+            Don't have an account? <a href="{% url 'register' %}">Register</a>
+        </p>
     </div>
 </div>
+
+<!-- jQuery Script to Auto-Hide Messages -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Hides the message after 5 seconds (5000ms)
+            $('.alert').hide(4000);
+        });
+    </script>
 {% endblock %}

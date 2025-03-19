@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings  # Import the settings module
+
+
+
 class Client(models.Model):
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default='')
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -21,10 +24,18 @@ class Client(models.Model):
         return self.name
 
 class Project(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ('not_started', 'Not Started'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('on_hold', 'On Hold'),
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
     name = models.CharField(max_length=100)
     budget = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
 
     def __str__(self):
         return self.name
@@ -77,7 +88,7 @@ class Stage(models.Model):
         return f"{self.stage_type} - {self.project.name}"
 
 class Expense(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name="Project")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE,related_name='expenses', verbose_name="Project")
     stage = models.ForeignKey(Stage, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Stage")
     description = models.TextField()
     amount_spent = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Amount Spent")

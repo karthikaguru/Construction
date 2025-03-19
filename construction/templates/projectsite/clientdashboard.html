@@ -11,6 +11,13 @@
 <div class="container mt-5 d-flex flex-column align-items-center">
   <div class="content-section text-center "style="margin-left:16em; margin-top:5em;width:550px">
   <h1>Client Dashboard</h1>
+  {% if messages %}
+  <div>
+      {% for message in messages %}
+          <p class="alert alert-{{ message.tags }}">{{ message }}</p>
+      {% endfor %}
+  </div>
+  {% endif %}
   
   <!-- Displaying Clients and Their Projects -->
   <ul>
@@ -69,5 +76,12 @@
     
 </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Hides the message after 5 seconds (5000ms)
+            $('.alert').hide(4000);
+        });
+    </script>
 {% endblock %}
 

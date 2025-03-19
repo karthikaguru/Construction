@@ -130,3 +130,4 @@ LOGIN_REDIRECT_URL = 'site/client/create/'
 
 # For debugging, print loaded email variables
 
+AUTH_USER_MODEL = 'frontsite.CustomUser'

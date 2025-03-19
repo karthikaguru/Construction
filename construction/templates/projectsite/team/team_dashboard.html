@@ -5,60 +5,94 @@
 {% bootstrap_javascript %}
 
 {% block title %}Team Dashboard Details{% endblock %}
+
 {% block content %}
-<h1>Team Dashboard</h1>
+<div class="container-fluid create well table-responsive" style="margin-left:25em ;width:632px;margin-top:4em">
+    <h1 class="mb-4">Team Dashboard</h1>
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+            <p class="alert alert-{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-<!-- Statistics Section -->
-<div>
-    <h2>Statistics</h2>
-    <p>Ongoing Projects: {{ ongoing_projects }}</p>
-    <p>Completed Projects: {{ completed_projects }}</p>
-    <p>Total Expenses: ₹{{ total_expenses }}</p>
+    <!-- Statistics Section -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Ongoing Projects</h5>
+                    <p class="card-text display-4">{{ ongoing_projects }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Completed Projects</h5>
+                    <p class="card-text display-4">{{ completed_projects }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Expenses</h5>
+                    <p class="card-text display-4">₹{{ total_expenses }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project List Section -->
+    <div class="mb-4">
+        <h2 class="mb-3">Project List</h2>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Status</th>
+                    <th>Budget (₹)</th>
+                    <th>Total Spent (₹)</th>
+                </tr>
+            </thead>
+         
+                <tbody>
+                    {% for project, total_spent in projects_with_expenses %}
+                    <tr>
+                        <td>{{ project.name }}</td>
+                        <td>{{ project.get_status_display }}</td>
+                        <td>₹{{ project.budget }}</td>
+                        <td>₹{{ total_spent }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No projects found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+        </table>
+    </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="container-fluid create well table-responsive" style="margin-left:25em ;width:632px;margin-top:4em">
+        <h2 class="mb-3">Project Budgets vs. Expenses</h2>
+        <canvas id="budgetChart" width="400" height="200"></canvas>
+    </div>
 </div>
 
-<!-- Project List Section -->
-<div>
-    <h2>Projects</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Project Name</th>
-                <th>Status</th>
-                <th>Budget</th>
-                <th>Total Spent</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for project, total_spent in projects|zip(total_spents) %}
-            <tr>
-                <td>{{ project.name }}</td>
-                <td>{{ project.get_status_display }}</td>
-                <td>₹{{ project.budget }}</td>
-                <td>₹{{ total_spent }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No projects found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<!-- Chart Section (Optional) -->
-<div>
-    <h2>Project Budgets</h2>
-    <canvas id="budgetChart"></canvas>
-</div>
-
-
+<!-- Chart Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Parsing JSON data from context
-    const projectNames = JSON.parse('{{ project_names|escapejs }}'); // Escapes special characters for safe JavaScript
+    // Parse JSON data from context
+    const projectNames = JSON.parse('{{ project_names|escapejs }}');
     const budgets = JSON.parse('{{ budgets|escapejs }}');
     const totalSpents = JSON.parse('{{ total_spents|escapejs }}');
 
-    // Setting up the chart
+    // Initialize the bar chart
     const ctx = document.getElementById('budgetChart').getContext('2d');
     const budgetChart = new Chart(ctx, {
         type: 'bar',
@@ -66,14 +100,14 @@
             labels: projectNames, // Project names as chart labels
             datasets: [
                 {
-                    label: 'Budget',
+                    label: 'Budget (₹)',
                     data: budgets, // Budget data
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1,
                 },
                 {
-                    label: 'Total Spent',
+                    label: 'Total Spent (₹)',
                     data: totalSpents, // Total spent data
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                     borderColor: 'rgba(255, 99, 132, 1)',
@@ -85,15 +119,22 @@
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'top', // Position of the chart legend
+                    position: 'top',
                 },
             },
             scales: {
                 y: {
-                    beginAtZero: true, // Start Y-axis from zero
+                    beginAtZero: true, // Ensure the Y-axis starts at zero
                 },
             },
         },
     });
 </script>
-{%endblock%}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Hides the message after 5 seconds (5000ms)
+            $('.alert').hide(4000);
+        });
+    </script>
+{% endblock %}

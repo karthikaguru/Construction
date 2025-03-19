@@ -8,55 +8,72 @@
 
 {% block content %}
 
-<div class="container well p-2  d-flex justify-content-center " style="margin: 100px;margin-left:560px; max-width:450px;">
-    <div class="text-light" style="width: 100%; margin-left:45px;">
-        <h2 class=" page-header text-center mb-3 " style="color: rgb(3, 108, 106);">Register </h2>
+<div class="container well d-flex justify-content-center align-items-center" style="width: 650px; margin-top:7em;margin-left:550px;">
+    <div class="row p-2 m-3">
+        <h2 class="page-header text-center mb-4" style="color: rgb(75, 42, 165);">Register</h2>
+
         {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{message.tags}}">
+            <div class="alert well alert-{{message.tags}}">
                 {{message}}
             </div>
         {% endfor %}
         {% endif %}
-        <form method="POST" autocomplete="off">
+
+        <form method="POST" action="{% url 'register' %}" autocomplete="off">
             {% csrf_token %}
-            <legend class="border-bottom mb-3"  style="color: rgb(0, 41, 92)">Join-Today</legend>
-            
-            <div class="form-group row mb-3">
-                <label for="id_username" class="col-sm-3 col-form-label">Username:</label>
-                <div class="col-sm-9">
-                    {{ form.username }}
-                </div>
-            </div>
-            <div class="form-group row mb-3">
-                <label for="id_email" class="col-sm-3 col-form-label">Email:</label>
-                <div class="col-sm-9">
-                    {{ form.email }}
-                </div>
-            </div>
-            <div class="form-group row mb-3">
-                <label for="id_password1" class="col-sm-3 col-form-label" autocomplete="new-password">Password:</label>
-                <div class="col-sm-9">
-                    {{ form.password1 }}
-                </div>
-            </div>
-            <div class="form-group row mb-3">
-                <label for="id_password2" class="col-sm-3 col-form-label" autocomplete="new-password" >Confirm Password:</label>
-                <div class="col-sm-9">
-                    {{ form.password2 }}
+            <legend class="border-bottom mb-4" style="color: rgb(0, 41, 92)">Join Today</legend>
+
+            <div class="form-group row align-items-center mb-3">
+                <label for="username" class="col-md-3 col-form-label">Username:</label>
+                <div class="col-md-9">
+                    <input type="text" name="username" id="username" class="form-control" required>
                 </div>
             </div>
 
-            <div class="form-group mb-3">
-                <button class="btn btn-primary text-light" type="submit">Sign Up</button>
+            <div class="form-group row align-items-center mb-3">
+                <label for="email" class="col-md-3 col-form-label">Email:</label>
+                <div class="col-md-9">
+                    <input type="email" name="email" id="email" class="form-control" required>
+                </div>
             </div>
-            <div class="border-top pt-3 pb-2">
+
+            <div class="form-group row align-items-center mb-3">
+                <label for="password1" class="col-md-3 col-form-label">Password:</label>
+                <div class="col-md-9">
+                    <input type="password" name="password1" id="password1" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group row align-items-center mb-3">
+                <label for="password2" class="col-md-3 col-form-label">Confirm Password:</label>
+                <div class="col-md-9">
+                    <input type="password" name="password2" id="password2" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group row align-items-center mb-4">
+                <label for="role" class="col-md-3 col-form-label">Select Role:</label>
+                <div class="col-md-9">
+                    <select name="role" id="role" class="form-control" required>
+                        <option value="admin">Admin</option>
+                        <option value="team_user">Team User</option>
+                        <option value="client">Client</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+
+            <div class="border-top pt-3 pb-2 text-center">
                 <small class="text-muted">
-                    Already have an account? <a href="{% url 'login' %} ">Sign in</a>
+                    Already have an account? <a href="{% url 'login' %}">Sign in</a>
                 </small>
             </div>
         </form>
     </div>
 </div>
 
-{% endblock %}
+{%endblock%}
