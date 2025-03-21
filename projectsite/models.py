@@ -22,7 +22,6 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name
-
 class Project(models.Model):
     STATUS_CHOICES = [
         ('not_started', 'Not Started'),
@@ -36,9 +35,40 @@ class Project(models.Model):
     budget = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
-
+    length = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Length (feet)")
+    breadth = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Breadth (feet)")
+    total_land_area = models.DecimalField(max_digits=10, decimal_places=2, editable=False, null=True, verbose_name="Total Land Area (sq ft)")
+     
+    def save(self, *args, **kwargs):
+        # Dynamically calculate total land area if length and breadth are provided
+        if self.length and self.breadth:
+            self.total_land_area = (self.length * self.breadth ).sq.ft
+        else:
+            self.total_land_area = None
+        super().save(*args, **kwargs)
+   
     def __str__(self):
         return self.name
+
+    def update_status(self):
+        """
+        Dynamically updates the status of the project based on its related stages.
+        """
+        # Check related stages
+        if self.stages.filter(status='in_progress').exists():
+            self.status = 'in_progress'
+        elif self.stages.filter(status='not_started').exists():
+            self.status = 'not_started'
+        elif self.stages.filter(status='on_hold').exists():
+            self.status = 'on_hold'
+        elif self.stages.filter(status='completed').count() == self.stages.count():
+            self.status = 'completed'
+        else:
+            self.status = 'not_started'
+
+        # Save the updated status
+        self.save()
+
 
 
 class Stage(models.Model):
@@ -62,30 +92,28 @@ class Stage(models.Model):
         ('furniture_installation', 'Furniture Installation'),
         ('final_touchups', 'Final Touch-ups')
     ]
-    COMPLETED_CHOICES = [
-        ('C', 'Completed'),
-        ('NC', 'Not Completed'),
-        ('P', 'Pending')
-    ]
+  
     STATUS_CHOICES = [
         ('not_started', 'Not Started'),
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
         ('on_hold', 'On Hold'),
     ]
-
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='stages')
     name = models.CharField(max_length=100)
     due_date = models.DateField()
-    completed = models.CharField(max_length=50, choices=COMPLETED_CHOICES, default='P')
-    progress = models.IntegerField(default=0)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
+    progress = models.IntegerField(default=0)  # Percentage progress
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     stage_type = models.CharField(max_length=50, choices=STAGE_CHOICES)
-   
-
     def __str__(self):
-        return f"{self.stage_type} - {self.project.name}"
+        return f"{self.name} - {self.project.name}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save stage instance
+        # Update project status
+        self.project.update_status()
 
 class Expense(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE,related_name='expenses', verbose_name="Project")

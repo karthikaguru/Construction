@@ -4,13 +4,21 @@
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 
-
 {% block title %}Manage Project Details{% endblock %}
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% block content %}
-<div class="container-fluid create well table-responsive" style="margin-left:25em ;width:632px;margin-top:4em">
+<div class="container-fluid" style="margin-left:25em; width:750px; margin-top:4em;">
+    {% if messages %}
+    {% for message in messages|slice:":1" %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
     <h1 class="text-center mb-4">Manage Projects</h1>
-        {% if user.role %}
+    
+    <!-- Role-based greeting -->
+    {% if user.role %}
         {% if user.role == 'ADMIN' %}
             <p>Welcome, Admin!</p>
         {% elif user.role == 'CLIENT' %}
@@ -24,28 +32,27 @@
         <p>No role assigned.</p>
     {% endif %}
 
-
     <!-- Filter Form -->
     <form method="post" class="mb-4">
         {% csrf_token %}
         <div class="row g-2 justify-content-center">
             <div class="col-md-4">
-
-                    <select name="status" class="form-select">
-                        <option value="">All Statuses</option>
-                        {% for status, label in status_options %}
-                        <option value="{{ status }}" {% if status == selected_status %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                    
-                 
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for status, label in status_options %}
+                    <option value="{{ status }}" {% if status == selected_status %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-md-4">
                 <select name="client" class="form-select">
                     <option value="">All Clients</option>
                     {% for client in clients %}
-                    <option value="{{ client.id }}" {% if client.id|stringformat:"s" == request.POST.client %}selected{% endif %}>{{ client.name }}</option>
+                    <option value="{{ client.id }}" 
+                    {% if client.id|stringformat:"s" == request.POST.client %}
+                    selected{% endif %}>
+                    {{ client.name }}
+                   </option>
                     {% endfor %}
                 </select>
             </div>
@@ -56,12 +63,15 @@
     </form>
 
     <!-- Project List -->
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered text-center">
         <thead>
             <tr>
                 <th>Project Name</th>
                 <th>Client</th>
                 <th>Status</th>
+                <th>Budget</th>
+                <th>Expenses</th>
+                <th>Total Area (sq ft)</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -71,8 +81,11 @@
                 <td>{{ project.name }}</td>
                 <td>{{ project.client.name }}</td>
                 <td>{{ project.get_status_display }}</td>
+                <td>₹{{ project.budget }}</td>
+                <td>₹{{ project.total_expenses }}</td>
+                <td>{{ project.total_land_area }}</td> <!-- New field for total area -->
                 <td>
-                    <a href="{% url 'project_edit_view' project.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'project_edit' project.id %}" class="btn btn-sm btn-warning"> Update</a>
                     <form method="post" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="delete_project" value="{{ project.id }}">
@@ -82,10 +95,26 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" class="text-center">No projects found.</td>
+                <td colspan="7" class="text-center">No projects found.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Summary Section -->
+    <h3 class="text-center mt-4">Summary</h3>
+    <p>Total Budget: ₹{{ total_budget }}</p>
+    <p>Total Expenses: ₹{{ total_expenses }}</p>
+    <p>Total Profit: ₹{{ total_profit }}</p>
+    <p>Total Land Area: {{ total_land_area }} sq ft</p> <!-- Total land area summary -->
 </div>
+
+{% block Scripts %}
+<script>
+    $(document).ready(function () {
+        // Hide the alert messages after 4 seconds
+        $('.alert').hide(4000);
+    });
+</script>
+{% endblock %}
 {% endblock %}

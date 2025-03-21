@@ -1,0 +1,140 @@
+{% extends 'projectsite/base.html' %}
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% block title %}Client Dashboard{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    #budgetChart,#spentChart {
+        width:40%;
+        height: 300px;
+    }
+</style>
+
+{% block content %}
+<div class="container" style="margin-left:15em;height: 560px; margin-top:130px;">
+    {% if messages %}
+    {% for message in messages|slice:":1" %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
+    <div class="row m-4 p-3"  >
+        <div class="col-lg-4  ">
+            <div class="card">
+                <div class="card-header bg-secondary text-light">
+                    User Statistics
+                </div>
+                <div class="card-body">
+                    <p>Total Users: {{ user_count }}</p>
+                    <p>Active Users: {{ active_users }}</p>
+                    <p>New Users (This Month): {{ new_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-light">
+                    Project Statistics
+                </div>
+                <div class="card-body">
+                    <p>Total Projects: {{ total_projects }}</p>
+                    <p>Ongoing Projects: {{ ongoing_projects }}</p>
+                    <p>Completed Projects: {{ completed_projects }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-light">
+                    Client Information
+                </div>
+                <div class="card-body" style="height: 150px;">
+                    <p>Total Clients: {{ total_clients }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Graphs Section -->
+    <div class="chart-container mt-5">
+        <h3 class="text-center">Budget Bar Chart</h3>
+        <canvas id="budgetChart" style="max-width: 100%; height: 300px;"></canvas>
+    </div>
+    <div class="chart-container mt-5">
+        <h3 class="text-center">Total Spent Line Chart</h3>
+        <canvas id="spentChart" style="max-width: 100%; height: 300px;"></canvas>
+    </div>
+</div>
+
+{% block Scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Inject data from the backend
+    const projectNames = JSON.parse('{{ project_names|escapejs }}');  // X-axis labels
+    const budgets = JSON.parse('{{ budgets|escapejs }}');            // Bar chart data
+    const totalSpents = JSON.parse('{{ total_spents|escapejs }}');   // Line chart data
+
+    // Bar Chart for Budgets
+    const ctx1 = document.getElementById('budgetChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar', // Chart type
+        data: {
+            labels: projectNames, // X-axis: Project names
+            datasets: [{
+                label: 'Budget (₹)',
+                data: budgets, // Y-axis: Budget values
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: {
+                    beginAtZero: true, // Start Y-axis at zero
+                }
+            }
+        }
+    });
+
+    // Line Chart for Total Spent
+    const ctx2 = document.getElementById('spentChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'line', // Chart type
+        data: {
+            labels: projectNames, // X-axis: Project names
+            datasets: [{
+                label: 'Total Spent (₹)',
+                data: totalSpents, // Y-axis: Total spent values
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: {
+                    beginAtZero: true, // Start Y-axis at zero
+                }
+            }
+        }
+    });
+ 
+    $(document).ready(function () {
+        // Hides the message after 5 seconds (5000ms)
+            $('.alert').hide(4000);
+        });
+</script>
+{% endblock %}
+{% endblock %}
+

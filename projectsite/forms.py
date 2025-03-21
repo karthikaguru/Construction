@@ -11,43 +11,47 @@ class ClientForm(forms.ModelForm):
         ]
         widgets = {
             'user': forms.Select(attrs={'class': 'form-control'}),
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your name'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your phone number'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}),
-            'site_location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the site location'}),
-            'site_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the site name'}),
-            'project_start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'project_end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your name', 'autocomplete': 'off'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your phone number', 'autocomplete': 'off'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email', 'autocomplete': 'off'}),
+            'site_location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the site location', 'autocomplete': 'off'}),
+            'site_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the site name', 'autocomplete': 'off'}),
+            'project_start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'autocomplete': 'off'}),
+            'project_end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'autocomplete': 'off'}),
             'documents': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
 
 
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'budget', 'description', 'client']
+        fields = ['client', 'name', 'budget', 'length', 'breadth', 'description', 'status']  
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'budget': forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'client': forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'client': forms.Select(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter project name'}),
+            'budget': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter budget'}),
+            'length': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter length in feet'}),  
+            'breadth': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter breadth in feet'}),  
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter description'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
         }
+
 
 class StageForm(forms.ModelForm):
     class Meta:
         model = Stage
-        fields = ['project','name', 'due_date', 'completed', 'progress', 'start_date', 'end_date', 'stage_type']
+        fields = ['project', 'name', 'due_date', 'progress', 'status', 'start_date', 'end_date', 'stage_type']
         widgets = {
-            'project': forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'autocomplete': 'off'}),
-            'completed': forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'progress': forms.NumberInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'autocomplete': 'off'}),
-            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'autocomplete': 'off'}),
-            'stage_type': forms.Select(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'project': forms.Select(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter stage name'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'progress': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter progress percentage'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'stage_type': forms.Select(attrs={'class': 'form-control'}),
         }
+
 
 class ExpenseForm(forms.ModelForm):
     class Meta:

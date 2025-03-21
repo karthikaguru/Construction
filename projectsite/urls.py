@@ -4,18 +4,18 @@ from projectsite import views
 
 urlpatterns = [
     #Admin view
-    path('manage-projects/', views.manage_projects, name='manage_projects'),
+   
     path('client/create/', views.client_create_view, name='client_create'),
     path('client/<int:client_id>/', views.client_details, name='client_details'),
     path('client/<int:client_id>/edit/', views.client_edit_view, name='client_edit'),
-    path('client/<int:pk>/delete/', views.client_delete_view, name='client_delete'),
+    path('client/<int:client_id>/delete/', views.client_delete_view, name='client_delete'),
     path('clients/', views.client_list, name='client_list'),
     
 
     # Dashboard URLs
-    path('team/dashboard/', views.team_dashboard_view, name='team_dashboard'),
+    path('manage_projects/', views.manage_projects, name='manage_projects'),
     path('client/dashboard/', views.client_dashboard_view, name='client_dashboard_view'),
-    path('admin_dashboard',views.admin_dashboard_view,name='admin_dashboard'),
+    path('admin_dashboard/',views.admin_dashboard_view,name='admin_dashboard'),
     
 
     # Success and Status Update URLs
@@ -45,6 +45,8 @@ urlpatterns = [
     path('projects/<int:project_id>/expenses/<int:expense_id>/', views.expense_details, name='expense_details'),
     path('projects/<int:project_id>/expenses/<int:expense_id>/edit/', views.expense_edit, name='expense_edit'),
     path('projects/<int:project_id>/expenses/<int:expense_id>/delete/', views.expense_delete, name='expense_delete'),
+
+    
 ]
 
 

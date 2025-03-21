@@ -6,94 +6,48 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
 from django.core.serializers.json import DjangoJSONEncoder
 from datetime import date
 import json
 
-
-
+User = get_user_model()
+from django.shortcuts import render
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 
 def manage_projects(request):
-    # Fetch all projects
-    projects = Project.objects.all()
+    # Fetch all projects and calculate total expenses and total land area dynamically
+    projects = Project.objects.annotate(
+        total_expenses=Sum('expenses__amount_spent'),  # Sum up related 'amount_spent' fields from Expense model
+        total_land_area=ExpressionWrapper(
+            F('length') * F('breadth'), output_field=DecimalField(max_digits=10, decimal_places=2)
+        )  # Dynamically calculate total area
+    )
 
-    # Get the selected status from the POST or GET request (depending on your form method)
+    # Get the selected status from POST request
     selected_status = request.POST.get('status', '').strip() if request.method == 'POST' else ''
-    
-    # Optionally filter projects based on the selected status
     if selected_status:
         projects = projects.filter(status=selected_status)
-    
-    # Pass the context variables to the template
-    context = {
-        'projects': projects,
-        'status_options': Stage.STATUS_CHOICES,  # Example: [('in_progress', 'In Progress'), ('completed', 'Completed')]
-        'selected_status': selected_status,
-    }
-    return render(request, 'projectsite/admin/manage_projects.html', context)
 
-
-@login_required
-def team_dashboard_view(request):
-    # Fetch all projects associated with the Team User's clients
-    projects = Project.objects.filter(client__user=request.user)
-
-    # Calculate total expenses per project
-    total_spents = [
-        float(
-            Expense.objects.filter(project=project).aggregate(
-                total_spent=Sum('amount_spent')
-            )['total_spent'] or 0
-        )
-        for project in projects
-    ]
-
-    # Zip projects and their respective total expenses
-    projects_with_expenses = zip(projects, total_spents)
-
-    # Calculate aggregated data for the dashboard
-    ongoing_projects = projects.filter(status='in_progress').count()
-    completed_projects = projects.filter(status='completed').count()
-    total_expenses = Expense.objects.filter(project__in=projects).aggregate(
-        total_spent=Sum('amount_spent')
-    )['total_spent'] or 0
+    # Calculate financial totals across all filtered projects
+    total_budget = projects.aggregate(Sum('budget'))['budget__sum'] or 0
+    total_expenses = projects.aggregate(Sum('total_expenses'))['total_expenses__sum'] or 0
+    total_profit = total_budget - total_expenses
+    total_land_area = projects.aggregate(Sum('total_land_area'))['total_land_area__sum'] or 0
 
     # Prepare context for the template
     context = {
-        'projects_with_expenses': projects_with_expenses,  # Zipped list passed to template
-        'ongoing_projects': ongoing_projects,
-        'completed_projects': completed_projects,
-        'total_expenses': total_expenses,
+        'projects': projects,  
+        'status_options': Stage.STATUS_CHOICES,  # Available statuses for filtering
+        'selected_status': selected_status,  # Selected status to maintain state in the template
+        'total_budget': total_budget,  # Total budget of filtered projects
+        'total_expenses': total_expenses,  # Total expenses of filtered projects
+        'total_profit': total_profit,  # Profit calculation
+        'total_land_area': total_land_area,  # Total land area of all projects
     }
-    return render(request, 'projectsite/team/team_dashboard.html', context)
-
-@login_required
-
-def view_project_details(request, project_id):
-    # Get the project, ensuring it's linked to the logged-in user's client account
-    project = get_object_or_404(Project, id=project_id, client__user=request.user)
-
-    # Fetch related stages and expenses for the project
-    stages = Stage.objects.filter(project=project)
-    expenses = Expense.objects.filter(project=project)
-
-    # Aggregate financial details
-    total_budget = project.budget
-    total_spent = expenses.aggregate(total_spent=Sum('amount'))['total_spent'] or 0
-    remaining_budget = total_budget - total_spent
-
-    # Prepare context data for the template
-    context = {
-        'project': project,
-        'stages': stages,
-        'expenses': expenses,
-        'total_budget': total_budget,
-        'total_spent': total_spent,
-        'remaining_budget': remaining_budget,
-    }
-    return render(request, 'projectsite/client/project_details.html', context)
-
+    
+    return render(request, 'projectsite/admin/manage_projects.html', context)
 
 
 @login_required
@@ -101,9 +55,8 @@ def client_create_view(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
-                client = form.save(commit=False)
-                client.user = request.user  # Assign the current logged-in user to the user field
-                client.save()
+                form.save()
+               
 
         return redirect('client_list')
     else:
@@ -121,7 +74,7 @@ def client_details(request, client_id):
 
 @login_required
 def client_edit_view(request, client_id):
-    client = get_object_or_404(Client, id=client_id, user=request.user)
+    client = get_object_or_404(Client, id=client_id)
     
     if request.method == 'POST':
         form = ClientForm(request.POST, request.FILES, instance=client)
@@ -156,24 +109,13 @@ def client_dashboard_view(request):
 
     # Get all projects associated with these clients
     projects = Project.objects.filter(client__in=clients).annotate(
-        total_spent=Sum('expenses__amount_spent')  # Use the correct related name
+        total_spent=Sum('expenses__amount_spent')  # Annotates the total spent for each project
     )
-
-    # Get stages and expenses for these projects
-    stages = Stage.objects.filter(project__in=projects)
-    expenses = Expense.objects.filter(project__in=projects)
 
     # Prepare chart data
     project_names = [project.name for project in projects]
     budgets = [float(project.budget) for project in projects]
-    total_spents = [
-        float(
-            Expense.objects.filter(project=project).aggregate(
-                total_spent=Sum('amount_spent')
-            )['total_spent'] or 0
-        )
-        for project in projects
-    ]
+    total_spents = [project.total_spent or 0 for project in projects]
 
     # Prepare the context for rendering
     context = {
@@ -182,18 +124,7 @@ def client_dashboard_view(request):
         'project_names': json.dumps(project_names, cls=DjangoJSONEncoder),
         'budgets': json.dumps(budgets, cls=DjangoJSONEncoder),
         'total_spents': json.dumps(total_spents, cls=DjangoJSONEncoder),
-        'stages': stages,
-        'expenses': expenses,
-    }
-
-    # Debugging output (remove in production)
-    print("Projects:", list(projects.values()))
-    print("Stages:", list(stages.values()))
-    print("Expenses:", list(expenses.values()))
-    print("Project Names:", project_names)
-    print("Budgets:", budgets)
-    print("Total Spents:", total_spents)
-
+         }
     return render(request, 'projectsite/clientdashboard.html', context)
 
 
@@ -204,7 +135,6 @@ def client_list(request):
 
 # List all projects
 @login_required
- #@user_passes_test(is_admin) 
 def project_list(request, client_id=None):
     if client_id:
         projects = Project.objects.filter(client_id=client_id)
@@ -241,7 +171,7 @@ def project_add_view(request):
 
 
 @login_required
-# Allow Admins, Team Users, and Clients  Admins can edit any projec
+# Allow Admins, Team Users, and Clients  Admins can edit any project
 def project_edit_view(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
@@ -261,7 +191,7 @@ def project_edit_view(request, project_id):
 
 
 @login_required
- # @user_passes_test(is_team_user) #Allow only Team Users
+#Allow only Team Users
 def project_list_view(request):
     projects = Project.objects.filter(client__user=request.user)
     return render(request, 'projectsite/project_list.html', {'projects': projects})
@@ -275,31 +205,6 @@ def project_delete_view(request, project_id):
         project.delete()
         return redirect('project_list')  
     return render(request, 'projectsite/project/project_delete.html', {'project': project})
-
-
-@login_required
-def project_dashboard_view(request):
-    clients = Client.objects.filter(user=request.user)  # Retrieve all clients associated with the logged-in user
-    if not clients.exists():
-        # Redirect to a page where user can create a Client profile or display a friendly message
-        return render(request, 'projectsite/no_client.html')
-    
-    projects = Project.objects.filter(client__in=clients)
-    project_names = [project.name for project in projects]
-    budgets = [float(project.budget) for project in projects]
-    total_spents = [float(sum(expense.amount_spent for expense in Expense.objects.filter(project=project))) for project in projects]
-
-    context = {
-        'clients': clients,
-        'projects': projects,
-        'project_names': json.dumps(project_names),
-        'budgets': json.dumps(budgets),
-        'total_spents': json.dumps(total_spents),
-    }
-    return render(request, 'projectsite/projectdashboard.html', context)
-
-
-
 
 
 @login_required
@@ -348,7 +253,7 @@ def admin_dashboard_view(request):
 
     # Project Statistics
     total_projects = Project.objects.count()
-    ongoing_projects = Project.objects.filter(status='ongoing').count()
+    ongoing_projects = Project.objects.filter(status='in_progress').count()
     completed_projects = Project.objects.filter(status='completed').count()
 
     # Client Statistics
@@ -360,7 +265,7 @@ def admin_dashboard_view(request):
 
     # Data for Charts
     project_data = Project.objects.annotate(
-        total_spent=Sum('expense__amount_spent')
+        total_spent=Sum('expenses__amount_spent')
     )  # Annotates each project with total spent
     project_names = [project.name for project in project_data]
     budgets = [float(project.budget) for project in project_data]
@@ -380,7 +285,7 @@ def admin_dashboard_view(request):
         'budgets': json.dumps(budgets),
         'total_spents': json.dumps(total_spents),
     }
-    return render(request, 'projectsite/admindashboard.html', context)
+    return render(request, 'projectsite/admin/admindashboard.html', context)
 
 
 

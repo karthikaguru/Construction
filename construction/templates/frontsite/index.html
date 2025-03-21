@@ -1,24 +1,53 @@
-<!DOCTYPE html>
 {% load static%}
-{% load bootstrap5 %}
-{% bootstrap_css %}
-{% bootstrap_javascript %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta tags for responsiveness and charset -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{%static 'css/leaf.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-    
-</head>
-<body>
 
-    {% include 'frontsite/header.html'%}
+    <!-- Title of the page -->
+    <title>Welcome to Leaf Construction</title>
     
-    {% block content %}
-    {% endblock %}
-    
+    <!-- Import Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: aqua;">
+    <!-- Main container -->
+    <div class="container text-center mt-5" style="margin-left: 20px;">
+        <h1>Welcome to Leaf Construction</h1>
+        <p class="lead">Your partner in reliable and professional construction services.</p>
+        
+        <!-- Banner image -->
+        <img src="{% static 'documents/documents/construction-banner.jpg' %}" alt="Construction banner" class="img-fluid my-4" style="max-height: 400px;">
+        
+        <!-- Row with three columns -->
+        <div class="row">
+            <!-- About Us column -->
+            <div class="col-md-4">
+                <h3>About Us</h3>
+                <p>Learn more about our mission, values, and dedication to providing top-notch construction services.</p>
+                <a href="#" class="btn btn-primary">Learn More</a>
+            </div>
+            
+            <!-- Our Projects column -->
+            <div class="col-md-4">
+                <h3>Our Projects</h3>
+                <p>Explore our portfolio of successful projects and ongoing works.</p>
+                <a href="{% url 'project_list'%}" class="btn btn-primary">View Projects</a>
+            </div>
+            
+            <!-- Contact Us column -->
+            <div class="col-md-4">
+                <h3>Contact Us</h3>
+                <p>Have questions or want to work with us? Reach out to our team today!</p>
+                <a href="/contact" class="btn btn-primary">Get in Touch</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

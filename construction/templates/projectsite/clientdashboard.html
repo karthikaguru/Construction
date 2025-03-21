@@ -4,13 +4,13 @@
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 {% block title %}Client Dashboard{% endblock %}
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% block content %}
 
 
-<div class="container mt-5 d-flex flex-column align-items-center">
-  <div class="content-section text-center "style="margin-left:16em; margin-top:5em;width:550px">
-  <h1>Client Dashboard</h1>
+<div class="container mt-5 d-flex flex-column align-items-center mb-5" >
+  <div class="content-section text-center "style="margin-left:34em; width:700px">
+
   {% if messages %}
   <div>
       {% for message in messages %}
@@ -18,20 +18,39 @@
       {% endfor %}
   </div>
   {% endif %}
-  
-  <!-- Displaying Clients and Their Projects -->
-  <ul>
-    {% for client in clients %}
-      <li>
-        <strong>{{ client.name }}</strong>
-        <ul>
-          {% for project in client.project_set.all %}
-            <li>{{ project.name }} - Budget: {{ project.budget }}</li>
-          {% endfor %}
-        </ul>
-      </li>
-    {% endfor %}
-  </ul>
+
+
+ 
+
+  <div class="container-fluid mt-5">
+    <h1 class="text-success " style="font-weight: bold;">Client Dashboard</h1>
+    <h2 class="text-secondary mb-5"> Welcome, {{ project_names}}</h2>
+    
+    
+    <table class="table table-bordered table-hover">
+        <thead class="bg-secondary text-light"> 
+            <tr>
+                <th>Project Name</th>
+                <th>Status</th>
+                <th>Budget</th>
+                <th>Amount Spent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+                <tr>
+                    <td>{{ project.name }}</td>
+                    <td>{{ project.status }}</td>
+                    <td>${{ project.budget }}</td>
+                    <td>${{ project.total_spent|default:0 }}</td>
+
+                </tr>
+               
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 
   <!-- Adding charts (if required) -->
   <h2>Project Budgets and Total Spent</h2>
@@ -76,7 +95,7 @@
     
 </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(document).ready(function () {
         // Hides the message after 5 seconds (5000ms)

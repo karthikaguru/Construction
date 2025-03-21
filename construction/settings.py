@@ -27,6 +27,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    'adminlte3',
+    'adminlte3_theme',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -117,7 +119,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = 'static/'
 MEDIA_URL = 'documents/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'documents/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'images/')
+STATIC_ROOT =os.path.join(BASE_DIR,'staticfiles')
 STATICFILES_DIRS = [
     STATIC_DIR
 ]

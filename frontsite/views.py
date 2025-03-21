@@ -4,6 +4,7 @@ from .models import CustomUser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from .forms import LoginForm
 
 
 def register(request):
@@ -64,34 +65,35 @@ def register(request):
 
 
 def login_view(request):
+    form = LoginForm()
     if request.method == 'POST':
-        # Get the username and password from the POST request
-        username = request.POST.get('username')  # Fetch username from the form
-        password = request.POST.get('password')  # Fetch password from the form
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
 
-        # Authenticate the user using username and password
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)  # Log the user in
-            messages.success(request, 'Login successful!')
+            # Authenticate the user
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, 'Login successful!')
 
-            # Redirect based on the user's role
-            if user.role == CustomUser.ADMIN:
-                return redirect('site/manage-projects/')
-            elif user.role == CustomUser.TEAM_USER:
-                return redirect('site/team/dashboard/')
-            elif user.role == CustomUser.CLIENT:
-                return redirect('site/client/dashboard/')
+                # Redirect based on the user's role
+                if user.role == CustomUser.ADMIN:
+                    return redirect('site/admin_dashboard/')
+                elif user.role == CustomUser.TEAM_USER:
+                    return redirect('site/manage_projects/')
+                elif user.role == CustomUser.CLIENT:
+                    return redirect('site/client/dashboard/')
+                else:
+                    messages.warning(request, 'Invalid user role. Please contact support.')
+                    return redirect('index')
             else:
-                messages.warning(request, 'Invalid user role. Please contact support.')
-                return redirect('index')  # Redirect in case of an error
-        else:
-            # Handle invalid credentials
-            messages.warning(request, 'Invalid credentials. Please try again.')
-            return redirect('/')
+                messages.warning(request, 'Invalid credentials. Please try again.')
+                return redirect('login')
 
-    # Render the login form for GET requests
-    return render(request, 'frontsite/login.html')
+    return render(request, 'frontsite/login.html', {'form': form})
+
 
 
 @login_required
@@ -107,5 +109,5 @@ def logout_view(request):
     return redirect('/')
 
 def index(request):
-     return render(request, 'projectsite/index.html')
+     return render(request, 'frontsite/index.html')
 

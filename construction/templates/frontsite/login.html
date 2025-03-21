@@ -7,28 +7,29 @@
 {% block title %}Login - Leaf Construction{% endblock %}
 
 {% block content %}
-<div class="container-fluid create well table-responsive d-flex justify-content-center align-items-center" style="margin-left:25em;width: 500px; margin-top: 11em;">
+<div class="container-fluid create well table-responsive d-flex justify-content-center align-items-center " style="margin-left:27em;width: 500px; margin-top: 11em;">
     <div class="row p-3">
         <!-- Brand Heading -->
         <h1 class="pb-3 text-center" style="color: rgb(75, 42, 165);">Leaf Construction</h1>
 
         <!-- Display Django Messages -->
         {% if messages %}
-                  {% for message in messages %}
-                  <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                      
-                   </div>
-                  {% endfor %}
-        {% endif %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
 
         <!-- Login Form -->
-        <form method="POST" action="{% url 'login' %}">
+        <form method="POST" action="{% url 'login' %} " autocomplete="off">
             {% csrf_token %}
             <!-- Username Field -->
             <div class="form-group row mb-3">
-                <label for="username" class="col-sm-3 col-form-label">Username:</label>
+                <label for="username" class="col-sm-3 col-form-label mt-1" >Username:</label>
                 <div class="col-sm-9">
+                    <input type="text" style="display: none;">
                     <input 
                         type="text" 
                         name="username" 
@@ -41,15 +42,17 @@
             </div>
             
             <!-- Password Field -->
-            <div class="form-group row mb-3">
+            <div class="form-group row mb-3 popup"  >
                 <label for="password" class="col-sm-3 col-form-label">Password:</label>
                 <div class="col-sm-9">
+                    <input type="text" style="display: none;">
                     <input 
                         type="password" 
                         name="password" 
                         id="password" 
                         placeholder="Enter your password" 
                         class="form-control" 
+                        autocomplete="new-password"
                         required
                     >
                 </div>
@@ -75,5 +78,15 @@
         // Hides the message after 5 seconds (5000ms)
             $('.alert').hide(4000);
         });
-    </script>
+   
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    });
+    document.getElementById('password').addEventListener('focus', function () {
+        this.setAttribute('autocomplete', 'off');
+        this.value = ''; // Clear the autofilled value, if any
+    });
+    
+</script>
 {% endblock %}
