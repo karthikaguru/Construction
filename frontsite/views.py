@@ -111,3 +111,9 @@ def logout_view(request):
 def index(request):
      return render(request, 'frontsite/index.html')
 
+def contact_us(request):
+      return render(request, 'frontsite/contactus.html')
+
+
+def about_us(request):
+    return render(request, 'frontsite/about.html')  # Ensure the template exists at this location

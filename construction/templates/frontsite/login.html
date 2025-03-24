@@ -59,15 +59,25 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary px-3">Login</button>
-            </div>
+            <div >
+                
+                <div class="form-group text-center">
+                    <!-- Reset Button -->
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" class="btn btn-secondary ms-2" onclick="resetForm()">Reset</button>
+                
+                    <!-- Password Reset Link -->
+                    <a href="{% url 'password_reset' %}" class="btn btn-primary ms-2">Forgot Password?</a>
+                    <p class="text-center mt-3">
+                        Don't have an account? <a href="{% url 'register' %}">Register</a>
+                    </p>
+                </div>
+                </div>
+                            </div>
         </form>
 
         <!-- Register Link -->
-        <p class="text-center mt-3">
-            Don't have an account? <a href="{% url 'register' %}">Register</a>
-        </p>
+       
     </div>
 </div>
 
@@ -87,6 +97,11 @@
         this.setAttribute('autocomplete', 'off');
         this.value = ''; // Clear the autofilled value, if any
     });
-    
+    function resetForm() {
+        // Clear input fields
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    }
+
 </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 from .models import Client, Project, Stage, Expense
-
+from decimal import Decimal
 
 class ClientForm(forms.ModelForm):
     class Meta:
@@ -31,10 +31,11 @@ class ProjectForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter project name'}),
             'budget': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter budget'}),
             'length': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter length in feet'}),  
-            'breadth': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter breadth in feet'}),  
+            'breadth': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter breadth in feet'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter description'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
+ 
 
 
 class StageForm(forms.ModelForm):

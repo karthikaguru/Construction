@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings  # Import the settings module
-
+from decimal import Decimal
 
 
 class Client(models.Model):
@@ -37,16 +37,19 @@ class Project(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     length = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Length (feet)")
     breadth = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Breadth (feet)")
-    total_land_area = models.DecimalField(max_digits=10, decimal_places=2, editable=False, null=True, verbose_name="Total Land Area (sq ft)")
-     
+    land_area = models.DecimalField(max_digits=10, decimal_places=2, null=True, verbose_name="Total Land Area (sq ft)")
+
     def save(self, *args, **kwargs):
         # Dynamically calculate total land area if length and breadth are provided
         if self.length and self.breadth:
-            self.total_land_area = (self.length * self.breadth ).sq.ft
+            self.land_area = Decimal(self.length) * Decimal(self.breadth)
+            # Ensure precision to 2 decimal places
+            self.land_area = self.land_area.quantize(Decimal('0.01'))
         else:
-            self.total_land_area = None
+            self.land_area = None  # Set to None if either length or breadth is missing
         super().save(*args, **kwargs)
-   
+
+
     def __str__(self):
         return self.name
 
