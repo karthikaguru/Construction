@@ -117,3 +117,7 @@ def contact_us(request):
 
 def about_us(request):
     return render(request, 'frontsite/about.html')  # Ensure the template exists at this location
+
+
+def password_reset_complete(request):
+    return render(request, "frontsite/password_reset_complete.html")

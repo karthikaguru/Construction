@@ -66,8 +66,12 @@
                     <button type="submit" class="btn btn-primary">Login</button>
                     <button type="button" class="btn btn-secondary ms-2" onclick="resetForm()">Reset</button>
                 
-                    <!-- Password Reset Link -->
-                    <a href="{% url 'password_reset' %}" class="btn btn-primary ms-2">Forgot Password?</a>
+                    <!-- Password Reset Link 
+                    <a href="{% url 'password_reset' %}" class="btn btn-primary ms-2">Forgot Password?</a>-->
+                    <p class="mt-3">
+                        <a href="{% url 'password_reset' %}" class="forgot-password-link">Forgot Password?</a>
+                    </p>
+                
                     <p class="text-center mt-3">
                         Don't have an account? <a href="{% url 'register' %}">Register</a>
                     </p>

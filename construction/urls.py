@@ -14,3 +14,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)
 
+admin.site.site_header="Leaf construction"
+admin.site.site_title='Browser Title'
+admin.site.index_title ="Welcome to Construction Project....."
