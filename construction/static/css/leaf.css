@@ -112,3 +112,7 @@ h1, p {
 .description{
     text-align: right;
 }
+#budgetchart{
+     width:250px;
+     height:250px;
+}

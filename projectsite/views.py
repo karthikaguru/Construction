@@ -125,7 +125,7 @@ def client_dashboard_view(request):
         'budgets': json.dumps(budgets, cls=DjangoJSONEncoder),
         'total_spents': json.dumps(total_spents, cls=DjangoJSONEncoder),
          }
-    return render(request, 'projectsite/clientdashboard.html', context)
+    return render(request, 'projectsite/client/clientdashboard.html', context)
 
 
 

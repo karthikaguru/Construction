@@ -1,9 +1,10 @@
 from django.shortcuts import render,redirect 
 from django.contrib.auth.models import User 
-from .models import CustomUser
+from .models import CustomUser,PasswordResetRequest
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.crypto import get_random_string
 from .forms import LoginForm
 
 
@@ -94,6 +95,36 @@ def login_view(request):
 
     return render(request, 'frontsite/login.html', {'form': form})
 
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        user = CustomUser.objects.filter(email=email).first()
+        
+        if user:
+            token = get_random_string(32)
+            reset_request = PasswordResetRequest.objects.create(user=user, email=email, token=token)
+            reset_request.send_reset_email()
+            messages.success(request, 'Reset link sent to your email.')
+        else:
+            messages.error(request, 'Email not found.')
+    
+    return render(request, 'frontsite/forgot-password.html') 
+
+def reset_password_view(request, token):
+    reset_request = PasswordResetRequest.objects.filter(token=token).first()
+    
+    if not reset_request or not reset_request.is_valid():
+        messages.error(request, 'Invalid or expired reset link')
+        return redirect('index')
+
+    if request.method == 'POST':
+        new_password = request.POST['new_password']
+        reset_request.user.set_password(new_password)
+        reset_request.user.save()
+        messages.success(request, 'Password reset successful')
+        return redirect('login')
+
+    return render(request, 'frontsite/reset_password.html', {'token': token})  # Render reset password template
 
 
 @login_required
@@ -120,4 +151,5 @@ def about_us(request):
 
 
 def password_reset_complete(request):
-    return render(request, "frontsite/password_reset_complete.html")
+    
+    return render(request, "frontsite/password_reset_complete.html")  
